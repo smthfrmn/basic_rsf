@@ -1,36 +1,26 @@
-# Name of App *(Give your app a short and informative title. Please adhere to our convention of Title Case without hyphens (e.g. My New App))*
-
-MoveApps
-
-Github repository: *github.com/yourAccount/Name-of-App* *(the link to the repository where the code of the app can be found must be provided)*
+# simple_rsf
+Repository for doing simple resource selection analysis in Moveapps 
+Github repository: https://github.com/nilanjanchatterjee/basic_rsf
 
 ## Description
-*Enter here the short description of the App that might also be used when filling out the description when submitting the App to Moveapps. This text is directly presented to Users that look through the list of Apps when compiling Workflows.*
+The app models the *used* and *available* points generated in the **Background point generator** app into a resource selection function for population or each individuals from a tracking dataset.
 
 ## Documentation
-*Enter here a detailed description of your App. What is it intended to be used for. Which steps of analyses are performed and how. Please be explicit about any detail that is important for use and understanding of the App and its outcomes.*
+   
+This app models the data for resource selection analysis. For the analysis, *used* points are the locations where the animal is detected and *background* points are randomly generated locations to model the habitat selection. The analysis can be carried out for each individual or for the population in this app and the number of background points can also be defined by the user as a radio between *used* and *background* points. 
 
-### Input data
-*Indicate which type of input data the App requires. Currently only R objects of class `MoveStack` can be used. This will be extend in the future.*
+Environmental variables needs to be projected in the **lat-long** format. Other projection formats will lead to error in the modelling. 
 
-*Example*: MoveStack in Movebank format
 
-### Output data
-*Indicate which type of output data the App produces to be passed on to subsequent apps. Currently only R objects of class `MoveStack` can be used. This will be extend in the future. In case the App does not pass on any data (e.g. a shiny visualization app), it can be also indicated here that no output is produced to be used in subsequent apps.*
+## Input data
 
-*Example:* MoveStack in Movebank format
+*move/moveStack* in Movebank format 
 
-### Artefacts
-*If the App creates artefacts (e.g. csv, pdf, jpeg, shapefiles, etc), please list them here and describe each.*
+## Output data
 
-*Example:* `rest_overview.csv`: csv-file with Table of all rest site properties
+*move/moveStack* in Movebank format 
 
-### Parameters 
-*Please list and define all parameters that the App requires to be set, if necessary including their unit.*
+###Artefacts
 
-*Example:* `radius`: Defined radius the animal has to stay in for a given duration of time for it to be considered resting site. Unit: `metres`.
-
-### Null or error handling
-*Please indicate for each parameter as well as the input data which behaviour the App is supposed to show in case of errors or NULL values/input. Please also add notes of possible errors that can happen if parameters are improperly set and any other important information that you find the user should be aware of.*
-
-*Example:* **Parameter `radius`:** If no radius AND no duration are given, the input data set is returned with a warning. If no radius is given (NULL), but a duration is defined then a default radius of 1000m = 1km is set. 
+*csv* with the regression coefficients   
+*jpeg* with the coefficient plot
