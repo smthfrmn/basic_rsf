@@ -4,7 +4,7 @@
 ## Provided testing datasets in `./data/raw`: 
 ## "input1_pigeons.rds", "input2_geese.rds", "input3_stork.rds", "input4_goat.rds"  
 ## for own data: file saved as a .rds containing a object of class MoveStack
-inputFileName = "./data/raw/input2_geese.rds" 
+inputFileName = "./data/raw/input_wolf_test.rds" 
 
 ## optionally change the output file name
 unlink("./data/output/", recursive = TRUE) # delete "output" folder if it exists, to have a clean start for every run
@@ -24,13 +24,13 @@ outputFileName = "./data/output/output.rds"
 
 args <- list() # if your function has no arguments, this line still needs to be active
 # Add all your arguments of your r-function here
-args[["year"]] = 2014 
+args[["categorical"]] = FALSE
 
 ##############################
 ## source, setup & simulate ## leave as is!
 ##############################
 # this file is the home of your app code and will be bundled into the final app on MoveApps
-source("RFunction.R")
+source("Rfunction.R")
 
 # setup your environment
 Sys.setenv(
