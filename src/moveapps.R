@@ -16,7 +16,7 @@ simulateMoveAppsRun <- function(args) {
             args[["data"]] <- data
         }
 
-        result <- do.call(rFunction, args)
+        result <- do.call(Rfunction, args)
         storeResult(result, outputFile())
     },
     error = function(e)
