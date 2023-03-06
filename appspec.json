@@ -1,5 +1,6 @@
 {
-  "settings": [{
+  "settings": [
+    {
     "id": "raster_file",
       "name": "raster file",
       "description": "You can upload local files for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster.tif`. Note that fallback raster files of elevation are provided",
@@ -69,6 +70,6 @@
 	}
   ],
   "documentation" : {
-    "url": "https://github.com/nilanjanchatterjee/basic_rsf/blob/master/README.md
+    "url": "https://github.com/nilanjanchatterjee/basic_rsf/blob/master/README.md"
   }
 }
