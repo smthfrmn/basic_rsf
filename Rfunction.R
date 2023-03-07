@@ -4,8 +4,9 @@ library(sf)
 library(sp)
 library(ggplot2)
 library(elevatr)
+library(dplyr)
 
-Rfunction <- function(data, raster_file= NULL, categorical= FALSE)
+RFunction <- function(data, raster_file= NULL, categorical= FALSE)
 {
   data_df <-as.data.frame(data)
   
