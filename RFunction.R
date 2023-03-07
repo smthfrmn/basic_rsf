@@ -6,7 +6,7 @@ library(ggplot2)
 library(elevatr)
 library(dplyr)
 
-RFunction <- function(data, raster_file= NULL, categorical= FALSE)
+rFunction <- function(data, raster_file= NULL, categorical= FALSE)
 {
   data_df <-as.data.frame(data)
   
