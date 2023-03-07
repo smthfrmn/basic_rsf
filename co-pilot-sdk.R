@@ -30,7 +30,7 @@ args[["categorical"]] = FALSE
 ## source, setup & simulate ## leave as is!
 ##############################
 # this file is the home of your app code and will be bundled into the final app on MoveApps
-source("RFunction.R")
+source("rFunction.R")
 
 # setup your environment
 Sys.setenv(
