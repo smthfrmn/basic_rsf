@@ -5,6 +5,7 @@ library(sp)
 library(ggplot2)
 library(elevatr)
 library(dplyr)
+library(progress)
 
 rFunction <- function(data, raster_file= NULL, categorical= FALSE)
 {
@@ -23,7 +24,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE)
          #logger.info(print("The uploaded raster is not in lat-long projection, please change the projection")))
   }else
   {  ##Download the elevation data
-    elev_dat <- get_elev_point(as.data.frame(cbind(data_df$location.long, data_df$location.lat)),
+    elev_dat <- get_elev_point(as.data.frame(cbind("x"=data_df$location.long, "y"=data_df$location.lat)),
                                  prj=proj4string(data),  units="meters", src = "aws")
     raster_dat <- scale(elev_dat$elevation)
   
