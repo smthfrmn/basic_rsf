@@ -37,6 +37,9 @@
       },
       {
         "name": "sp"
+      },
+      {
+        "name": "progress"
       }
     ]
   },
