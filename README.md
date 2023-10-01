@@ -26,11 +26,12 @@ The output file includes a coefficient plot of the variables used in the resourc
 
 *.csv* with the regression coefficients   
 
-- Estimate represents the coeffcient estiamte of the habitat variable
+- Estimate represents the coeffcient estimate of the habitat variable
 - sd represents the standard error 
 - Pr(z) represents the value of the z-statistic
 - p-value represents wheather the coefficient estimate is significantly different from 0 or not
 
 *.jpeg* with the coefficient plot
-- delx represent the affinity towards the centroid location of the individual/population for longitude
-- delx represent the affinity towards the centroid location of the individual/population for latitude
+- `delx` represent the affinity towards the centroid location of the individual/population for longitude
+- `dely` represent the affinity towards the centroid location of the individual/population for latitude
+- `sqrt((delx)^2 + (dely)^2)` represent the affinity towards the centroid location of the individual/population for both the axes
