@@ -7,12 +7,13 @@ library(elevatr)
 library(dplyr)
 library(progress)
 
-rFunction <- function(data, raster_file= NULL, categorical= FALSE)
+rFunction <- function(data, raster_file= NULL, categorical= FALSE, type_ind = FALSE)
 {
   data_df <-as.data.frame(data)
   
   data_df$delx <- data_df$location.long - mean(data_df$location.long)
   data_df$dely <- data_df$location.lat - mean(data_df$location.lat)
+  data_df$distxy <- sqrt((data_df$delx)^2+(data_df$dely)^2)
   
   # data_bbox <- expand.grid( c(min(data_df$location.long), max(data_df$location.long)),
   #                           c(min(data_df$location.lat), max(data_df$location.lat)))
@@ -40,12 +41,22 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE)
   ## Regression of dummy variables for categorical raster
   if (categorical){
     
-    modglm <-glm(case ~ as.factor(raster_dat) + delx + dely,data = data_df)
+    modglm <-glm(case ~ as.factor(raster_dat) + delx + dely + 
+                   sqrt((delx)^2 + (dely)^2),data = data_df)
   } 
   
     ##Run the regression
     modglm <-glm(case ~ raster_dat + delx + dely,data = data_df)
   
+    if(type_ind){
+      uid <-unique(data_df$trackId)
+      ind_result <-list()
+      for(i in 1:length(uid)){
+        ##to-do :include also the categorical raster function
+        ind_result[[i]] <-modglm <-glm(case ~ raster_dat + delx + dely +
+                                         sqrt((delx)^2 + (dely)^2),data = data_df)
+      }
+    }
     ## Arranging the regression output
   output <- as.data.frame(summary(modglm)$coefficients)
   
