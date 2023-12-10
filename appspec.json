@@ -12,6 +12,13 @@
       "description": "Specify if the raster used for the resource selction analysis is a cetegorical raster (Landuse-Landcover) or continuous",
       "defaultValue": "FALSE",
       "type": "STRING"
+    },
+    {
+      "id": "num_layers",
+      "name": "How many layers do the user uploaded raster has",
+      "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
+      "defaultValue": 1,
+      "type": "INTEGER"
     }
     ],
     
@@ -40,6 +47,15 @@
       },
       {
         "name": "progress"
+      },
+      {
+        "name": "gecko"
+      },
+      {
+        "name": "nasapower"
+      },
+      {
+        "name": "rerddapXtracto"
       }
     ]
   },
