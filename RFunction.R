@@ -18,9 +18,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
            dely= location.lat - mean(location.lat)) %>% 
     mutate(distxy = sqrt((delx)^2 + (dely)^2))
   
-  ### Load the raster data
-  raster <- rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
-  
+ 
   # data_df$delx <- data_df$location.long - mean(data_df$location.long)
   # data_df$dely <- data_df$location.lat - mean(data_df$location.lat)
   # data_df$distxy <- sqrt((data_df$delx)^2+(data_df$dely)^2)
@@ -52,25 +50,32 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
                                  prj=st_crs(4326),  units="meters", src = "aws")
     
     data_df$elevation <- scale(elev_dat$elevation)
+    
+    ### Load the raster data
+    raster <- rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
+    
     data_df$forest_cover <- as.numeric(scale(terra::extract(raster$tree_canopy_cover, 
                                  cbind(data_df$location.long, data_df$location.lat),
                           method= "bilinear")))
-    data_df$lulc <- terra::extract(raster$LC_Type1, 
+    data_df$lulc <- terra::extract(raster$LC, 
                                               cbind(data_df$location.long, data_df$location.lat))
+    data_df$ghm <- terra::extract(raster$gHM, 
+                                   cbind(data_df$location.long, data_df$location.lat))
+    
     ##Run the regression
     #str(data_df)
-    modglm <-glm(case ~ elevation + forest_cover + (lulc$LC_Type1) +
+    modglm <-glm(case ~ elevation + forest_cover + (lulc$LC) + ghm$gHM + 
                    delx + dely + distxy, data = data_df,
                  family = binomial(link = "logit"))
     
     ## Arranging the regression output
-    output <- as.data.frame(summary(modglm)$coefficients)
+    output <- broom::tidy(modglm, conf.int = TRUE)
     
     modplot <-ggplot(output) +
-      geom_point(aes(y= rownames(output), x= Estimate), col ="blue")+
-      geom_linerange(aes(y= rownames(output),
-                         xmin= Estimate-1.96*`Std. Error` , 
-                         xmax= Estimate+1.96*`Std. Error`))+
+      geom_point(aes(y= term, x= estimate), col ="blue")+
+      geom_linerange(aes(y= term,
+                         xmin= conf.low , 
+                         xmax= conf.high))+
       labs(y= "Variable", x= "Coefficient Estimate")+
       theme_bw()+
       coord_cartesian(xlim = c(-10,10))
@@ -94,24 +99,24 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
       uid <-unique(data_df$trackId)
       #ind_result <-list()
       glmfits <- data_df %>% nest(data=-trackId) %>% 
-        mutate(mod = map(data, function(x) (glm(case ~ elevation + forest_cover + lulc$LC_Type1 +
-                                                     delx + dely + distxy, data = data_df,
+        mutate(mod = map(data, function(x) (glm(case ~ elevation + forest_cover + lulc$LC + ghm$gHM +
+                                                     delx + dely + distxy, data = x,
                                                     family = binomial(link = "logit")))))
       
       coefglm<-NULL
       
       for(i in 1:length(uid)){
         {
-          coefglm<-rbind(coefglm, cbind(id=glmfits$trackId[[i]],  broom::tidy(glmfits$mod[[i]]$model)))
+          coefglm<-rbind(coefglm, cbind(id=glmfits$trackId[[i]],  broom::tidy(glmfits$mod[[i]], conf.int = TRUE)))
         }                  
       }
       output <- coefglm
       
       modplot <-ggplot(output) +
-        geom_point(aes(y= rownames(output), x= Estimate), col ="blue")+
-        geom_linerange(aes(y= rownames(output),
-                           xmin= Estimate-1.96*`Std. Error` , 
-                           xmax= Estimate+1.96*`Std. Error`))+
+        geom_point(aes(y= term, x= estimate), col ="blue")+
+        geom_linerange(aes(y= term,
+                           xmin= conf.low , 
+                           xmax= conf.high))+
         labs(y= "Variable", x= "Coefficient Estimate")+
         facet_wrap(~ id)+
         theme_bw()+
