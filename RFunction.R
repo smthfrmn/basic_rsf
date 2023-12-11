@@ -1,32 +1,32 @@
 library(move)
 #library(raster)
 library(terra)
+library(tidyterra)
 library(sf)
-library(sp)
+#library(sp)
 library(ggplot2)
 library(elevatr)
 library(tidyverse)
 library(progress)
+library(cowplot)
 
 rFunction <- function(data, raster_file= NULL, categorical= FALSE, 
                       type_ind = FALSE, num_layers = 1)
 {
   data_df <-as.data.frame(data)
   
+  
   data_df <- data_df %>% 
     mutate(delx = location.long - mean(location.long), 
            dely= location.lat - mean(location.lat)) %>% 
     mutate(distxy = sqrt((delx)^2 + (dely)^2))
   
- 
-  # data_df$delx <- data_df$location.long - mean(data_df$location.long)
-  # data_df$dely <- data_df$location.lat - mean(data_df$location.lat)
-  # data_df$distxy <- sqrt((data_df$delx)^2+(data_df$dely)^2)
-  # 
-  # data_bbox <- expand.grid( c(min(data_df$location.long), max(data_df$location.long)),
-  #                           c(min(data_df$location.lat), max(data_df$location.lat)))
-
-   
+  data_sf <-  data_df |> filter (case == TRUE) |>
+    st_as_sf(coords = c("location.long", "location.lat"), crs=4326)
+  
+  rast_ext <- ext(c(xmin = min(data_df$location.long)-0.5, xmax = max(data_df$location.long)+0.5,
+                    ymin = min(data_df$location.lat)-0.5, ymax = max(data_df$location.lat)+0.5))
+  
   #### Upload the raster file
   if(is.null(raster_file) == FALSE)
     {    rast1 <-rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
@@ -42,6 +42,16 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
          
          ##Run the regression
          modglm <-glm(case ~ raster_dat + delx + dely + distxy, data = data_df)
+         
+                  
+         rast_crop <- c(crop(rast1, rast_ext))
+         ### plot the raster layers 
+         rast_plot <- ggplot()+geom_spatraster(data = rast_crop)+
+                  facet_wrap(~ lyr)+
+                  theme_bw()+scale_fill_hypso_c()+
+                  geom_sf(data = data_sf, size=0.5)+ 
+            theme(legend.position = "right",
+                 axis.text = element_text(size = 6))
          
          }else
   {  ##Download the elevation data
@@ -81,6 +91,42 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
       labs(y= "Variable", x= "Coefficient Estimate")+
       theme_bw()+
       coord_cartesian(xlim = c(-10,10))
+    
+    
+    rast_crop <- c(crop(raster$tree_canopy_cover, rast_ext), crop(as.numeric(raster$LC), rast_ext),
+                   crop(raster_ghm, rast_ext))
+    
+    rast_crop <- c(crop(raster$tree_canopy_cover, rast_ext), crop(raster$LC, rast_ext),
+                   crop(raster_ghm, rast_ext))
+    
+    elev <-get_elev_raster(rast_crop, src = "aws",  prj = st_crs(4326),  units="meters", z=9)
+    
+    ### raster plots to check 
+    fcp <- ggplot()+geom_spatraster(data = rast_crop$tree_canopy_cover)+
+      theme_bw()+ scale_fill_hypso_c(direction = -1, palette = "dem_screen")+
+      geom_sf(data = data_sf, size = 0.25)+ labs(fill="`% forest cover`")+
+      theme(legend.position = "right",
+            axis.text = element_text(size = 5)) +ggtitle("Percentage forest cover")
+    
+    lulcp <- ggplot()+geom_spatraster(data = rast_crop$LC)+
+      theme_bw()+scale_fill_hypso_d()+
+      geom_sf(data = data_sf, size = 0.25) + labs(fill="Landuse\nlandcover")+
+      theme(legend.position = "right",
+            axis.text = element_text(size = 5)) +ggtitle("Landuse-landcover")
+    
+    hmp <- ggplot()+geom_spatraster(data = rast_crop$gHM)+
+      theme_bw()+scale_fill_viridis_c(direction = -1)+
+      geom_sf(data = data_sf, size = 0.25)+ labs(fill="Global human\nmodification")+
+      theme(legend.position = "right",
+            axis.text = element_text(size = 5)) +ggtitle("Human modification")
+    
+    elevp <- ggplot()+geom_spatraster(data = elev)+
+      theme_bw()+scale_fill_wiki_c()+
+      geom_sf(data = data_sf, size = 0.25) + labs(fill="Elevation")+
+      theme(legend.position = "right",
+            axis.text = element_text(size = 5))+ggtitle("Elevation")
+    
+    rast_plot<- plot_grid( fcp,lulcp, hmp, elevp) 
   # if(predict=TRUE)
   # { 
   #   elev <-get_elev_raster(data_bbox, src = "aws",  
@@ -91,10 +137,10 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
   }
   
   ## Regression of dummy variables for categorical raster
-  if (categorical){
-    
-    modglm <-glm(case ~ as.factor(raster_dat) + delx + dely + distxy,data = data_df)
-  } 
+  # if (categorical){
+  #   
+  #   modglm <-glm(case ~ as.factor(raster_dat) + delx + dely + distxy,data = data_df)
+  # } 
   
     
     if(type_ind){
@@ -109,7 +155,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
       
       for(i in 1:length(uid)){
         {
-          coefglm<-rbind(coefglm, cbind(id=glmfits$trackId[[i]],  broom::tidy(glmfits$mod[[i]], conf.int = TRUE)))
+          coefglm<-rbind(coefglm, cbind(trackId=glmfits$trackId[[i]],  broom::tidy(glmfits$mod[[i]], conf.int = TRUE)))
         }                  
       }
       output <- coefglm
@@ -120,7 +166,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
                            xmin= conf.low , 
                            xmax= conf.high))+
         labs(y= "Variable", x= "Coefficient Estimate")+
-        facet_wrap(~ id)+
+        facet_wrap(~ trackId)+
         theme_bw()+
         coord_cartesian(xlim = c(-10,10))
       # for(i in 1:length(uid)){
@@ -132,8 +178,15 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
       # }
     }
     
+  
+  
   ggsave(modplot, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Coeffcient_plot.jpeg"),
          width=9, height=6, units= "in", dpi=300)
-  write.csv(output, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"RSF_output.csv"))
+  
+  ggsave(rast_plot, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Raster_plot.jpeg"),
+         width=9, height=6, units= "in", dpi=300, bg= "white")
+  
+  write.csv(output, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"RSF_output.csv",
+                                  row.names = FALSE))
   return(data)
 }
