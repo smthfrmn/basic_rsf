@@ -59,7 +59,9 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
                           method= "bilinear")))
     data_df$lulc <- terra::extract(raster$LC, 
                                               cbind(data_df$location.long, data_df$location.lat))
-    data_df$ghm <- terra::extract(raster$gHM, 
+    
+    raster_ghm <- rast(paste0(getAppFilePath("raster_file"),"raster_hm.tif"))
+    data_df$ghm <- terra::extract(raster_ghm$gHM, 
                                    cbind(data_df$location.long, data_df$location.lat))
     
     ##Run the regression
