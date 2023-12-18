@@ -26,7 +26,13 @@
       "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
       "defaultValue": 1,
       "type": "INTEGER"
+    },
+     "providedAppFiles": [
+    {
+      "settingId": "raster_file",
+      "from": "provided-app-files/raster_file"
     }
+  ]
     ],
     
   "dependencies": {
