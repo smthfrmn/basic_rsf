@@ -30,7 +30,7 @@
      "providedAppFiles": [
     {
       "settingId": "raster_file",
-      "from": "provided-app-files/raster_file"
+      "from": "data/local_app_files/provided-app-files/raster_file/"
     }
   ]
     ],
