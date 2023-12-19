@@ -1,6 +1,6 @@
 {
   "settings": [
-    {
+  {
     "id": "raster_file",
       "name": "raster file",
       "description": "You can upload local files for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster.tif`. Note that fallback raster files of elevation, forest cover, Landcover and human modification are provided",
@@ -26,13 +26,13 @@
       "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
       "defaultValue": 1,
       "type": "INTEGER"
-    },
+    }
+],
      "providedAppFiles": [
     {
       "settingId": "raster_file",
       "from": "data/local_app_files/provided-app-files/raster_file/"
     }
-  ]
     ],
     
   "dependencies": {
@@ -80,7 +80,7 @@
   ],
   "people": [
     {
-      "firstName": "Nilanjan",
+       "firstName": "Nilanjan",
       "middleInitials": null,
       "lastName": "Chatterjee",
       "email": "nchatter@umn.edu",
@@ -89,13 +89,5 @@
       "affiliation": "University of Minnesota",
       "affiliationRor": ""
     }
-  ],
-  "funding": [
-    {
-	"name": "NASA MoveApps Project"
-	}
-  ],
-  "documentation" : {
-    "url": "https://github.com/nilanjanchatterjee/basic_rsf/blob/master/README.md"
-  }
+  ]
 }
