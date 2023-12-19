@@ -89,5 +89,13 @@
       "affiliation": "University of Minnesota",
       "affiliationRor": ""
     }
-  ]
+  ],
+	"funding": [
+    {
+	"name": "NASA MoveApps Project"
+	}
+  ],
+  "documentation" : {
+    "url": "https://github.com/nilanjanchatterjee/Step_selection_Analysis/blob/master/README.md"
+  }
 }
