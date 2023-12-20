@@ -91,3 +91,105 @@
     }
   ]
 }
+=======
+{
+  "settings": [
+  {
+    "id": "raster_file",
+      "name": "raster file",
+      "description": "You can upload local files for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster.tif`. Note that fallback raster files of elevation, forest cover, Landcover and human modification are provided",
+      "type": "LOCAL_FILE"
+  },
+   {
+      "id": "categorical",
+      "name": "Whether the raster is categorical or not",
+      "description": "Specify if the raster used for the resource selction analysis is a cetegorical raster (Landuse-Landcover) or continuous",
+      "defaultValue": "FALSE",
+      "type": "STRING"
+    },
+    {
+      "id": "type_ind",
+      "name": "Whether the resource selection analysis is done at a individual level or population level",
+      "description": "Specify if the resource selction analysis is done to be individualwise or for the population",
+      "defaultValue": "FALSE",
+      "type": "STRING"
+    },
+    {
+      "id": "num_layers",
+      "name": "How many layers do the user uploaded raster has",
+      "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
+      "defaultValue": 1,
+      "type": "INTEGER"
+    }
+],
+     "providedAppFiles": [
+    {
+      "settingId": "raster_file",
+      "from": "data/local_app_files/provided-app-files/raster_file/"
+    }
+    ],
+    
+  "dependencies": {
+    "R": [
+      {
+        "name": "ggplot2"
+      },
+	  {
+        "name": "sf"
+      },
+      {
+        "name": "move"
+      },
+      {
+        "name": "terra"
+      },
+      {
+        "name": "elevatr"
+      },
+      {
+        "name": "tidyverse"
+      },
+      {
+        "name": "tidyterra"
+      },
+      {
+        "name": "progress"
+      },
+      {
+        "name": "cowplot"
+      }
+    ]
+  },
+  "createsArtifacts": true,
+  "license": {
+    "key": "MIT"
+  },
+  "language": "eng",
+  "keywords": [
+    "resource selection",
+    "habitat-use",
+    "movement modelling",
+    "spatio-temporal",
+	  "animal movement"
+  ],
+  "people": [
+    {
+       "firstName": "Nilanjan",
+      "middleInitials": null,
+      "lastName": "Chatterjee",
+      "email": "nchatter@umn.edu",
+      "roles": ["author", "creator"],
+      "orcid": "0000-0002-7932-0191",
+      "affiliation": "University of Minnesota",
+      "affiliationRor": ""
+    }
+  ],
+	"funding": [
+    {
+	"name": "NASA MoveApps Project"
+	}
+  ],
+  "documentation" : {
+    "url": "https://github.com/nilanjanchatterjee/Step_selection_Analysis/blob/master/README.md"
+  }
+}
