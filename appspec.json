@@ -31,7 +31,7 @@
      "providedAppFiles": [
     {
       "settingId": "raster_file",
-      "from": "data/local_app_files/provided-app-files/raster_file/"
+      "from": "provided-app-files/raster_file/"
     }
     ],
     
@@ -96,6 +96,6 @@
 	}
   ],
   "documentation" : {
-    "url": "https://github.com/nilanjanchatterjee/Step_selection_Analysis/blob/master/README.md"
+    "url": "https://github.com/nilanjanchatterjee/basic_rsf/blob/master/README.md"
   }
 }
