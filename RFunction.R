@@ -63,7 +63,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
     
     ### Load the raster data
     raster <- rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
-    
+    raster$LC <- as.factor(raster$LC)
     data_df$forest_cover <- as.numeric(scale(terra::extract(raster$tree_canopy_cover, 
                                  cbind(data_df$location.long, data_df$location.lat),
                           method= "bilinear")))
