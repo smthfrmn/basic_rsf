@@ -1,4 +1,4 @@
-library(move)
+library(move2)
 #library(raster)
 library(terra)
 library(tidyterra)
@@ -13,6 +13,10 @@ library(cowplot)
 rFunction <- function(data, raster_file= NULL, categorical= FALSE, 
                       type_ind = FALSE, num_layers = 1)
 {
+  data <- data |> mutate(location.long = sf::st_coordinates(data)[,1],
+                         location.lat = sf::st_coordinates(data)[,2],
+                         trackId = mt_track_id(data))
+   
   data_df <-as.data.frame(data)
   
   
@@ -32,7 +36,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
     {    rast1 <-rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
     if(nlyr(rast1) != num_layers)
       {logger.info(print("User provided number of layers does not match with the number of layers of the uploaded raster"))}
-         raster_dat <-extract(rast1, coordinates(data) ,method='bilinear', fun=mean)
+         raster_dat <- terra::extract(rast1, coordinates(data) ,method='bilinear', fun=mean)
          #logger.info(print("The uploaded raster is not in lat-long projection, please change the projection")))
          ## Regression of dummy variables for categorical raster
          if (categorical){
