@@ -7,11 +7,10 @@
       "type": "LOCAL_FILE"
   },
    {
-      "id": "categorical",
-      "name": "Whether the raster is categorical or not",
-      "description": "Specify if the raster used for the resource selction analysis is a cetegorical raster (Landuse-Landcover) or continuous",
-      "defaultValue": "FALSE",
-      "type": "STRING"
+      "id": "raster_cat_file",
+      "name": "Categorical raster file",
+      "description": "You can upload local categorical raster files for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster_cat.tif`.",
+      "type": "LOCAL_FILE"
     },
     {
       "id": "type_ind",
@@ -26,12 +25,45 @@
       "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
       "defaultValue": 1,
       "type": "INTEGER"
-    }
+    },
+    {
+      "id": "raster_selection",
+      "name": "Variables for modelling",
+      "description": "Select one or more variables which would be used in the resource selection function",
+      "defaultValue": "all",
+      "type": "RADIOBUTTONS",
+      "options": [
+        {
+          "value": "availability_sampling",
+          "displayText": "delx, dely, distxy"
+        },
+		        {
+          "value": "elevation",
+          "displayText": "Elevation"
+        },
+        {
+          "value": "forest_cover",
+          "displayText": "Forest Cover"
+        },
+        {
+          "value": "landcover",
+          "displayText": "Landcover"
+        },
+        {
+          "value": "ghm",
+          "displayText": "Human modification"
+        },
+        {
+          "value": "all",
+          "displayText": "All of the above"
+        }
+      ]
+    }  
 ],
      "providedAppFiles": [
     {
       "settingId": "raster_file",
-      "from": "provided-app-files/raster_file/"
+      "from": "data/local_app_files/provided-app-files/raster_file/"
     }
     ],
     
