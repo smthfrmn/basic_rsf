@@ -32,23 +32,40 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
                     ymin = min(data_df$location.lat)-0.5, ymax = max(data_df$location.lat)+0.5))
   
   #### Upload the raster file
-  if(is.null(raster_file) == FALSE)
+  if(is.null(raster_file) == FALSE & is.null(raster_cat_file) == FALSE)
     {    rast1 <-rast(paste0(getAppFilePath("raster_file"),"raster.tif"))
-    if(nlyr(rast1) != num_layers)
-      {logger.info(print("User provided number of layers does not match with the number of layers of the uploaded raster"))}
-         raster_dat <- terra::extract(rast1, coordinates(data) ,method='bilinear', fun=mean)
-         #logger.info(print("The uploaded raster is not in lat-long projection, please change the projection")))
+         rast2 <-rast(paste0(getAppFilePath("raster_cat_file"),"raster_cat.tif"))
+         raster_cat_dat <- terra::extract(rast2, cbind(data_df$location.long, data_df$location.lat))
+         cols2 <- colnames(raster_cat_dat)
          ## Regression of dummy variables for categorical raster
-         if (categorical){
-           
-           modglm <-glm(case ~ as.factor(raster_dat) + delx + dely + distxy,data = data_df)
-         } 
-         
+         # if (categorical){
+         #   if(nlyr(rast1) >1)
+         #   {logger.info(print("The raster contains multiple ")))
+         #   
+         #   modglm <-glm(case ~ as.factor(raster_dat) + delx + dely + distxy,data = data_df)
+         # } 
+    if(nlyr(rast1) != num_layers)
+    {logger.info(print("User provided number of layers does not match with the number of layers of the uploaded raster"))}
+    raster_dat <- terra::extract(rast1, cbind(data_df$location.long, data_df$location.lat))
+    cols <- colnames(raster_dat)
          ##Run the regression
-         modglm <-glm(case ~ raster_dat + delx + dely + distxy, data = data_df)
+         modglm <-glm(as.formula(paste("case ~ delx + dely + distxy + ", paste0("raster_cat_dat$",cols2), "+",
+                                       paste0("raster_dat$",cols, collapse = "+"))), data = data_df)
          
-                  
-         rast_crop <- c(crop(rast1, rast_ext))
+         ## Arranging the regression output
+         output <- broom::tidy(modglm, conf.int = TRUE)
+         
+         modplot <-ggplot(output) +
+           geom_point(aes(y= term, x= estimate), col ="blue")+
+           geom_linerange(aes(y= term,
+                              xmin= conf.low , 
+                              xmax= conf.high))+
+           labs(y= "Variable", x= "Coefficient Estimate")+
+           theme_bw()+
+           coord_cartesian(xlim = c(-10,10))
+         
+         rast_crop <- c(crop(rast1, rast_ext), crop(rast2, rast_ext))
+         ### plot the raster layers )
          ### plot the raster layers 
          rast_plot <- ggplot()+geom_spatraster(data = rast_crop)+
                   facet_wrap(~ lyr)+
@@ -130,7 +147,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
       theme(legend.position = "right",
             axis.text = element_text(size = 5))+ggtitle("Elevation")
     
-    rast_plot<- plot_grid( fcp,lulcp, hmp, elevp) 
+    rast_plot<- plot_grid( fcp, elevp,lulcp, hmp) 
   # if(predict=TRUE)
   # { 
   #   elev <-get_elev_raster(data_bbox, src = "aws",  
