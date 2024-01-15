@@ -10,7 +10,7 @@ library(tidyverse)
 library(progress)
 library(cowplot)
 
-rFunction <- function(data, raster_file= NULL, categorical= FALSE, 
+rFunction <- function(data, raster_file= NULL, raster_cat_file= NULL, 
                       type_ind = FALSE, num_layers = 1)
 {
   data <- data |> mutate(location.long = sf::st_coordinates(data)[,1],
