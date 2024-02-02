@@ -120,7 +120,7 @@ rFunction <- function(data, raster_file= NULL, raster_cat_file= NULL,
     rast_crop <- c(crop(raster$tree_canopy_cover, rast_ext), crop(raster$LC, rast_ext),
                    crop(raster_ghm, rast_ext))
     
-    elev <-get_elev_raster(rast_crop, src = "aws",  prj = st_crs(4326),  units="meters", z=9)
+    elev <- rast(get_elev_raster(rast_crop, src = "aws",  prj = st_crs(4326),  units="meters", z=9))
     
     ### raster plots to check 
     fcp <- ggplot()+geom_spatraster(data = rast_crop$tree_canopy_cover)+
