@@ -207,7 +207,7 @@ rFunction <- function(data, raster_file= NULL, categorical= FALSE,
   ggsave(rast_plot, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"Raster_plot.jpeg"),
          width=9, height=6, units= "in", dpi=300, bg= "white")
   
-  write.csv(output, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"RSF_output.csv",
-                                  row.names = FALSE))
+  write.csv(output, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"RSF_output.csv"),
+                                  row.names = FALSE)
   return(data)
 }
