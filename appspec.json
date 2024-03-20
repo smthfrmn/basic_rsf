@@ -25,40 +25,7 @@
       "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
       "defaultValue": 1,
       "type": "INTEGER"
-    },
-    {
-      "id": "raster_selection",
-      "name": "Variables for modelling",
-      "description": "Select one or more variables which would be used in the resource selection function",
-      "defaultValue": "all",
-      "type": "RADIOBUTTONS",
-      "options": [
-        {
-          "value": "availability_sampling",
-          "displayText": "delx, dely, distxy"
-        },
-		        {
-          "value": "elevation",
-          "displayText": "Elevation"
-        },
-        {
-          "value": "forest_cover",
-          "displayText": "Forest Cover"
-        },
-        {
-          "value": "landcover",
-          "displayText": "Landcover"
-        },
-        {
-          "value": "ghm",
-          "displayText": "Human modification"
-        },
-        {
-          "value": "all",
-          "displayText": "All of the above"
-        }
-      ]
-    }  
+    }
 ],
      "providedAppFiles": [
     {
@@ -76,7 +43,7 @@
         "name": "sf"
       },
       {
-        "name": "move"
+        "name": "move2"
       },
       {
         "name": "terra"
