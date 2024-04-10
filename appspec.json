@@ -15,7 +15,7 @@
     {
       "id": "type_ind",
       "name": "Analysis level",
-      "description": "Specify if the resource selction analysis should be performed for the population or per individual.",
+      "description": "Specify if the resource selection analysis should be performed for the population or per individual.",
       "defaultValue": false,
       "type": "RADIOBUTTONS",
       "options": [
