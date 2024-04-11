@@ -14,10 +14,20 @@
     },
     {
       "id": "type_ind",
-      "name": "Whether the resource selection analysis is done at a individual level or population level",
-      "description": "Specify if the resource selction analysis is done to be individualwise or for the population. Selecting the value TRUE runs the resource selection model individualwise and FALSE runs the population model.",
-      "defaultValue": "FALSE",
-      "type": "STRING"
+      "name": "Analysis level",
+      "description": "Specify if the resource selection analysis should be performed for the population or per individual.",
+      "defaultValue": false,
+      "type": "RADIOBUTTONS",
+      "options": [
+        {
+          "value": false,
+          "displayText": "Population"
+        },
+        {
+          "value": true,
+          "displayText": "Individual"
+        }
+      ]
     },
     {
       "id": "num_layers",
