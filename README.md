@@ -15,13 +15,13 @@ Environmental variables representing relevant habitat and environmental characte
 * Multiple layers may be included in a raster file.
 * Be careful to identify whether your raster represents a categorical (e.g., habitat classification) or continuous (e.g., elevation in meters) variable, and upload the file in the corresponding setting.
 
-The app includes several global resource layers that are used as default for the analysis:  
-* elevation from [Amazon Web Services Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) using the [`elevatR`](https://cran.r-project.org/web/packages/elevatr/index.html) package (ground resolution varies by latitude and is 216.2 m at 45° latitude, [read more here](https://github.com/tilezen/joerd/blob/master/docs/data-sources.md#what-is-the-ground-resolution)) (displayed in outputs as 'elevation')
-* percentage tree cover from the [Global Forest Cover Change (GFCC)](https://doi.org/10.5067/MEaSUREs/GFCC/GFCC30TC.003) dataset (30-m resolution) (displayed in outputs as 'forest_cover')
-* land cover from [MODIS Land Cover Type Product MCD12Q1 Version 6.1](https://doi.org/10.5067/MODIS/MCD12Q1.061), Land Cover Type 1 (Annual International Geosphere-Biosphere Programme (IGBP) classification) (500-m resolution) (displayed in outputs as 'lulc$LC#', see categories below)
-* human modification the SEDAC [Global Human Modification of Terrestrial Systems](https://doi.org/https://doi.org/10.7927/edbc-3z60) dataset (1-km resolution, representing a median year of 2016) (displayed in outputs as ghm$gHM)
+The app includes four global resource layers that are used as default for the analysis. Each of these layers is downscaled to 1 km resolution due to storage constraints and for efficient computation: 
+* elevation from [Amazon Web Services Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) using the [`elevatR`](https://cran.r-project.org/web/packages/elevatr/index.html) package (original ground resolution varies by latitude and is 216.2 m at 45° latitude, [read more here](https://github.com/tilezen/joerd/blob/master/docs/data-sources.md#what-is-the-ground-resolution)) (displayed in outputs as 'elevation')
+* percentage tree cover from the [Global Forest Cover Change (GFCC)](https://doi.org/10.5067/MEaSUREs/GFCC/GFCC30TC.003) dataset (created at 30-m resolution) (displayed in outputs as 'forest_cover')
+* land cover from [MODIS Land Cover Type Product MCD12Q1 Version 6.1](https://doi.org/10.5067/MODIS/MCD12Q1.061), Land Cover Type 1 (Annual International Geosphere-Biosphere Programme (IGBP) classification) (created at 500-m resolution) (displayed in outputs as 'lulc$LC#', see categories below)
+* human modification the SEDAC [Global Human Modification of Terrestrial Systems](https://doi.org/https://doi.org/10.7927/edbc-3z60) dataset (created at 1-km resolution, representing a median year of 2016) (displayed in outputs as 'ghm$gHM')
 
-In addition, three other spatial variables are used:
+In addition, three other spatial variables are included in the model:
 * distance from the longitudinal centroid location of the individual/population (displayed in outputs as 'delx')
 * distance from the latitudinal centroid location of the individual/population (displayed in outputs as 'dely')
 * distance from the centroid location of the individual/population (displayed in outputs as 'delxy')
