@@ -29,23 +29,23 @@ In addition, three other spatial variables are used:
 The outputs includes a coefficient plot of the variables used in the resource selection function and a data frame of regression coefficients. Coefficients overlapping zero indicate non-significance (no selection), whereas coefficients greater than 0 indicate preference for and less than 0 signify avoidance of the environmental variable. 
 
 Land cover key: The Annual International Geosphere-Biosphere Programme (IGBP) classification from product [MCD12Q1](https://doi.org/10.5067/MODIS/MCD12Q1.061) (LC_Type1) has 17 classes. The coefficient used in the model refers the specific habitat with respect to first habitat class. The key is provided in Table 3 of the MODIS 12 User Guide or at [Google Earth Engine](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD12Q1):
-1: Evergreen Needleleaf Forests: dominated by evergreen conifer trees (canopy >2m). Tree cover >60%.
-2: Evergreen Broadleaf Forests: dominated by evergreen broadleaf and palmate trees (canopy >2m). Tree cover >60%.
-3: Deciduous Needleleaf Forests: dominated by deciduous needleleaf (larch) trees (canopy >2m). Tree cover >60%.
-4: Deciduous Broadleaf Forests: dominated by deciduous broadleaf trees (canopy >2m). Tree cover >60%.
-5: Mixed Forests: dominated by neither deciduous nor evergreen (40-60% of each) tree type (canopy >2m). Tree cover >60%.
-6: Closed Shrublands: dominated by woody perennials (1-2m height) >60% cover.
-7: Open Shrublands: dominated by woody perennials (1-2m height) 10-60% cover.
-8: Woody Savannas: tree cover 30-60% (canopy >2m).
-9: Savannas: tree cover 10-30% (canopy >2m).
-10: Grasslands: dominated by herbaceous annuals (<2m).
-11: Permanent Wetlands: permanently inundated lands with 30-60% water cover and >10% vegetated cover.
-12: Croplands: at least 60% of area is cultivated cropland.
-13: Urban and Built-up Lands: at least 30% impervious surface area including building materials, asphalt and vehicles.
-14: Cropland/Natural Vegetation Mosaics: mosaics of small-scale cultivation 40-60% with natural tree, shrub, or herbaceous vegetation.
-15: Permanent Snow and Ice: at least 60% of area is covered by snow and ice for at least 10 months of the year.
-16: Barren: at least 60% of area is non-vegetated barren (sand, rock, soil) areas with less than 10% vegetation.
-17: Water Bodies: at least 60% of area is covered by permanent water bodies.
+1: Evergreen Needleleaf Forests: dominated by evergreen conifer trees (canopy >2m). Tree cover >60%.  
+2: Evergreen Broadleaf Forests: dominated by evergreen broadleaf and palmate trees (canopy >2m). Tree cover >60%.  
+3: Deciduous Needleleaf Forests: dominated by deciduous needleleaf (larch) trees (canopy >2m). Tree cover >60%.  
+4: Deciduous Broadleaf Forests: dominated by deciduous broadleaf trees (canopy >2m). Tree cover >60%.  
+5: Mixed Forests: dominated by neither deciduous nor evergreen (40-60% of each) tree type (canopy >2m). Tree cover >60%.  
+6: Closed Shrublands: dominated by woody perennials (1-2m height) >60% cover.  
+7: Open Shrublands: dominated by woody perennials (1-2m height) 10-60% cover.  
+8: Woody Savannas: tree cover 30-60% (canopy >2m).  
+9: Savannas: tree cover 10-30% (canopy >2m).  
+10: Grasslands: dominated by herbaceous annuals (<2m).  
+11: Permanent Wetlands: permanently inundated lands with 30-60% water cover and >10% vegetated cover.  
+12: Croplands: at least 60% of area is cultivated cropland.  
+13: Urban and Built-up Lands: at least 30% impervious surface area including building materials, asphalt and vehicles.  
+14: Cropland/Natural Vegetation Mosaics: mosaics of small-scale cultivation 40-60% with natural tree, shrub, or herbaceous vegetation.  
+15: Permanent Snow and Ice: at least 60% of area is covered by snow and ice for at least 10 months of the year.  
+16: Barren: at least 60% of area is non-vegetated barren (sand, rock, soil) areas with less than 10% vegetation.  
+17: Water Bodies: at least 60% of area is covered by permanent water bodies.  
 
 ## Input data
 
