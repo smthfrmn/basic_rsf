@@ -3,19 +3,19 @@
   {
     "id": "raster_file",
       "name": "Continuous raster file",
-      "description": "You can upload local raster files with continuous data for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster.tif`. Note that fallback raster files of elevation, forest cover, Landcover and human modification are provided",
+      "description": "Optionally, upload a local raster file with continuous data to include in the resource selection function analysis. Make sure that the raster data overlap with the tracking data set and are in WGS84 projection! The App requires the following files, named exactly as given: 1. `raster.tif`. Note that fallback raster files of elevation, forest cover, land cover and human modification are provided.",
       "type": "LOCAL_FILE"
   },
    {
       "id": "raster_cat_file",
       "name": "Categorical raster file",
-      "description": "You can upload local categorical raster files for running the resource selection function analysis. Make sure that they overlap with the tracking data set and are in WGS 84 projection! The App requires the following files, named exactly as given: 1. `raster_cat.tif`.",
+      "description": "Optionally, upload a local raster file with categorical data to include in the resource selection function analysis. Make sure that the raster data overlap with the tracking data set and are in WGS84 projection! The App requires the following files, named exactly as given: 1. `raster_cat.tif`.",
       "type": "LOCAL_FILE"
     },
     {
       "id": "type_ind",
       "name": "Analysis level",
-      "description": "Specify if the resource selection analysis should be performed for the population or per individual.",
+      "description": "Specify whether the resource selection analysis should be performed for the population or per individual.",
       "defaultValue": false,
       "type": "RADIOBUTTONS",
       "options": [
@@ -31,8 +31,8 @@
     },
     {
       "id": "num_layers",
-      "name": "How many layers does the raster uploaded by user have",
-      "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
+      "name": "Number of layers in the uploaded raster",
+      "description": "If a local raster file is provided, specify the number of layers contained in the file.",
       "defaultValue": 1,
       "type": "INTEGER"
     }
