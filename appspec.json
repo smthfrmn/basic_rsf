@@ -13,32 +13,23 @@
       "type": "LOCAL_FILE"
     },
     {
-      "id": "type_ind",
-      "name": "Analysis level",
-      "description": "Specify if the resource selection analysis should be performed for the population or per individual.",
-      "defaultValue": false,
+      "id": "scale",
+      "name": "Scale",
+      "description": "Specify how you want to perform the resource selection function. Population will generate the background point for the whole area used by the individuals and Individual will generate background points based on the range of individuals.",
+      "defaultValue": "population",
       "type": "RADIOBUTTONS",
       "options": [
         {
-          "value": false,
+          "value": "population",
           "displayText": "Population"
         },
         {
-          "value": true,
+          "value": "individual",
           "displayText": "Individual"
         }
       ]
-    },
-    {
-      "id": "num_layers",
-      "name": "How many layers does the raster uploaded by user have",
-      "description": "Specify if the raster uploaded by the user has a single layer or multiple layers",
-      "defaultValue": 1,
-      "type": "INTEGER"
-    }
-],
-     "providedAppFiles": [
-    {
+    }],
+     "providedAppFiles": [{
       "settingId": "raster_file",
       "from": "data/local_app_files/provided-app-files/raster_file/"
     }
@@ -72,6 +63,9 @@
       },
       {
         "name": "cowplot"
+      },
+      {
+        "name": "purr"
       }
     ]
   },

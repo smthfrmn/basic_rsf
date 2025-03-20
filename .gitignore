@@ -2,4 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
 data/output
+scratch.R
+scraper.R
