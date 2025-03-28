@@ -64,7 +64,7 @@ get_rasters <- function(extent, raster_file, raster_cat_file) {
   } else {
     rast_lc_tree_canopy <- terra::rast(paste0(getAppFilePath("raster_file"), "raster.tif"))
 
-    rast_lc_tree_canopy$LC <- as.factor(default_raster$LC)
+    rast_lc_tree_canopy$LC <- as.factor(rast_lc_tree_canopy$LC)
 
     rast_ghm <- rast(paste0(getAppFilePath("raster_file"), "raster_hm.tif"))
 
@@ -86,6 +86,7 @@ get_rasters <- function(extent, raster_file, raster_cat_file) {
 
 
 fit_model <- function(model_df, model_variables, user_provided_rasters = FALSE) {
+
   custom_vars <- paste0(model_variables, collapse = " + ")
   formula_str <- stringr::str_interp(
     "case ~ delx + dely + distxy + ${custom_vars}"
@@ -154,15 +155,16 @@ get_nonraster_data <- function(move_data) {
       y = Y
     )
 
-  elev_dat <- get_elev_point(
+  elev_dat <- base::scale(get_elev_point(
     locations,
     prj = sf::st_crs(move_data), units = "meters", src = "aws"
-  ) |>
-    mutate(
-      elevation = base::scale(elevation)
-    )
+  )$elevation)[,1]
+  
+  elev_df <- dplyr::tibble(
+    elevation = elev_dat
+  )
 
-  return(elev_dat)
+  return(elev_df)
 }
 
 
@@ -250,12 +252,12 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
       dplyr::select(-nested_data)
   }
 
-
-  if (!user_provided_rasters) {
-    rasters$elevation <- terra::rast(
-      get_elev_raster(rasters[[1]], src = "aws", prj = st_crs(4326), units = "meters", z = 9)
-    )
-  }
+# 
+#   if (!user_provided_rasters) {
+#     rasters$elevation <- terra::rast(
+#       get_elev_raster(rasters[[1]], src = "aws", prj = st_crs(4326), units = "meters", z = 9)
+#     )
+#   }
 
 
   model_plot <- plot_model(model_plot_df = model_plot_df,
