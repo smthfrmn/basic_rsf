@@ -36,6 +36,11 @@ get_raster_data <- function(move_data, rasters) {
         new_data <- as.numeric(scale(terra::extract(current_raster[[j]], locations,
           method = "bilinear"
         )))
+      } else if (names(lyr) == "LC") {
+        new_data <- terra::extract(current_raster[[j]] |>
+                                     mutate(
+                                       LC = as.factor(LC)
+                                     ), locations)[,1]
       } else {
         new_data <- terra::extract(current_raster[[j]], locations)[,1]
       }
@@ -138,6 +143,7 @@ plot_model <- function(model_plot_df, scale, track_id_var) {
     labs(y = "Variable", x = "Coefficient Estimate") +
     theme_bw()
 
+  
   if (scale == INDIVIDUAL) {
     model_plot <- model_plot +
       facet_wrap(~get(track_id_var))
@@ -212,7 +218,23 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
                       scale = "population", num_layers = 1) {
 
   track_id_var <- mt_track_id_column(data)
-  rast_ext <- ext(data) + c(-0.5, 0.5, -0.5, 0.5)
+  rast_ext <- ext(as.vector(ext(data)) + c(-0.5, 0.5, -0.5, 0.5))
+  
+  # browser()
+  # 
+  # data_df <- data |> mutate(
+  #   location.long = sf::st_coordinates(data)[, 1],
+  #   location.lat = sf::st_coordinates(data)[, 2],
+  #   trackId = mt_track_id(data)
+  # ) |>
+  #   as.data.frame()
+  # 
+  # rast_ext <- ext(c(
+  #   xmin = min(data_df$location.long) - 0.5, xmax = max(data_df$location.long) + 0.5,
+  #   ymin = min(data_df$location.lat) - 0.5, ymax = max(data_df$location.lat) + 0.5
+  # ))
+  # 
+  saveRDS(rast_ext, file = here("data/new_rast_ext.rds"))
 
   raster_list_result <- get_rasters(
     extent = rast_ext,
@@ -227,6 +249,7 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
   model_data <- get_model_data(move_data = data, rasters = rasters, user_provided_rasters = user_provided_rasters)
 
 
+  saveRDS(model_data$model_df, file = here("data/new_model_df.rds"))
   if (scale == POPULATION) {
     model <- fit_model(
       model_df = model_data$model_df,
