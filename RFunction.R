@@ -220,20 +220,6 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
   track_id_var <- mt_track_id_column(data)
   rast_ext <- ext(as.vector(ext(data)) + c(-0.5, 0.5, -0.5, 0.5))
   
-  # browser()
-  # 
-  # data_df <- data |> mutate(
-  #   location.long = sf::st_coordinates(data)[, 1],
-  #   location.lat = sf::st_coordinates(data)[, 2],
-  #   trackId = mt_track_id(data)
-  # ) |>
-  #   as.data.frame()
-  # 
-  # rast_ext <- ext(c(
-  #   xmin = min(data_df$location.long) - 0.5, xmax = max(data_df$location.long) + 0.5,
-  #   ymin = min(data_df$location.lat) - 0.5, ymax = max(data_df$location.lat) + 0.5
-  # ))
-  # 
   saveRDS(rast_ext, file = here("data/new_rast_ext.rds"))
 
   raster_list_result <- get_rasters(
@@ -246,7 +232,9 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
   user_provided_rasters <- raster_list_result$user_provided_rasters
 
 
-  model_data <- get_model_data(move_data = data, rasters = rasters, user_provided_rasters = user_provided_rasters)
+  model_data <- get_model_data(move_data = data,
+                               rasters = rasters,
+                               user_provided_rasters = user_provided_rasters)
 
 
   saveRDS(model_data$model_df, file = here("data/new_model_df.rds"))
