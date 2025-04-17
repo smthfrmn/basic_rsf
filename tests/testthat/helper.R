@@ -47,7 +47,7 @@ move_dir <- function(source_dir, destination_dir) {
   
   # Check if source directory exists
   if (!dir.exists(source_dir)) {
-    stop("Source directory does not exist: ", source_dir)
+    message("Source directory does not exist: ", source_dir)
   }
   
   # Check if source and destination are the same
@@ -145,4 +145,30 @@ toggle_raster_dirs <- function(hide) {
     rast2_path <- here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/")
     move_dir(rast2_path, gsub("raster_cat_file_hide", "raster_cat_file", rast2_path, fixed = TRUE))
   }
+}
+
+project_raster <- function(crs){
+  rast <- terra::rast(here("data/local_app_files/uploaded-app-files/raster_file/raster.tif"))
+  rast_proj <- terra::project(rast, crs)
+  terra::writeRaster(rast_proj, here("tests/testthat/data/raster_proj.tif"))
+  return(rast_proj)
+}
+
+
+make_proj_rast_visible <- function(hide = FALSE){
+  
+  browser()
+  real_path <- here("data/local_app_files/uploaded-app-files/raster_file/raster.tif")
+  if (!hide) {
+    test_path <- here("tests/testthat/data/raster_proj.tif")
+    
+    if (!dir.exists(here("data/local_app_files/uploaded-app-files/raster_file/"))) {
+      dir.create(here("data/local_app_files/uploaded-app-files/raster_file/"))
+    }
+    
+    file.copy(test_path, real_path)  
+  } else {
+    file.remove(real_path)
+  }
+  
 }

@@ -1,24 +1,24 @@
 source(here("tests/testthat/helper.R"))
 
+SCALES <- c("individual", "population")
 
 test_that("function runs without error with user-provided rasters", {
   toggle_raster_dirs(hide = FALSE)
   
-  scales <- c("individual", "population")
 
-  for (i in 1:length(scales)) {
-    scale <- scales[i]
-    test_data <- test_data(str_interp("input_${scale}.rds"))
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
 
     expect_no_error(rFunction(
-      data = test_data,
+      data = sample_data,
       scale = scale,
       raster_file = "placeholder",
       raster_cat_file = "placeholder"
     ))
   }
   
-  toggle_raster_dirs(hide = TRUE)
+  withr::defer(toggle_raster_dirs(hide = TRUE))
   
 })
 
@@ -27,42 +27,42 @@ test_that("function runs without error with user-provided rasters", {
 test_that("function runs without error without user-provided rasters", {
   toggle_raster_dirs(hide = TRUE)
 
-  scales <- c("individual")
 
-  for (i in 1:length(scales)) {
-    scale <- scales[i]
-    test_data <- test_data(str_interp("input_${scale}.rds"))
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
 
     expect_no_error(rFunction(
-      data = test_data,
+      data = sample_data,
       scale = scale,
       raster_file = NULL,
       raster_cat_file = NULL
     ))
   }
 
-  toggle_raster_dirs(hide = FALSE)
+  withr::defer(toggle_raster_dirs(hide = TRUE))
+  
 })
 
 
 test_that("function runs without error without user-provided rasters", {
-  # toggle_raster_dirs(hide = TRUE)
+  toggle_raster_dirs(hide = TRUE)
   
-  scales <- c("individual", "population")
-  
-  for (i in 1:length(scales)) {
-    scale <- scales[i]
-    test_data <- test_data(str_interp("input_${scale}.rds"))
+
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
     
     expect_no_error(rFunction(
-      data = test_data,
+      data = sample_data,
       scale = scale,
       raster_file = NULL,
       raster_cat_file = NULL
     ))
   }
   
-  toggle_raster_dirs(hide = FALSE)
+  withr::defer(toggle_raster_dirs(hide = FALSE))
+  
 })
 
 
@@ -70,14 +70,13 @@ test_that("function runs without error without user-provided rasters", {
 test_that("function gives same output as old version without error without user-provided rasters", {
   toggle_raster_dirs(hide = TRUE)
   
-  scales <- c("individual", "population")
-  
-  for (i in 1:length(scales)) {
-    scale <- scales[i]
-    test_data <- test_data(str_interp("input_${scale}.rds"))
+
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
     
     result <- rFunction(
-      data = test_data,
+      data = sample_data,
       scale = scale,
       raster_file = NULL,
       raster_cat_file = NULL
@@ -104,5 +103,66 @@ test_that("function gives same output as old version without error without user-
 
   }
   
-  toggle_raster_dirs(hide = FALSE)
+  withr::defer(toggle_raster_dirs(hide = FALSE))
+  
+})
+
+
+toggle_proj_raster <- function(hide) {
+  
+  if (!hide) {
+    # make the projected raster visible
+    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"),
+                here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat_hide.tif"))
+    file.rename(here("tests/testthat/data/raster_cat_proj.tif"),
+                here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"))
+  } else {
+    # hide the projected
+    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"),
+                here("tests/testthat/data/raster_cat_proj.tif"))
+    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat_hide.tif"),
+                here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"))
+
+  }
+}
+
+
+
+sample_data <- test_data(str_interp("input_population.rds"))
+scale <- "population"
+rFunction(
+  data = test_data,
+  scale = scale,
+  raster_file = NULL,
+  raster_cat_file = NULL
+)
+
+
+methods_info <- get_projection_methods(test_rast)
+
+layers <- list()
+for (i in 1:nlyr(test_rast)) {
+  browser()
+  layer <- test_rast[[i]]
+  method <- methods_info$method_vector[i]
+  layers[[i]] <- terra::project(layer, "EPSG:3857", method = method)
+}
+
+test_that("function projects crs for unmatching move data and raster", {
+  toggle_raster_dirs(hide = TRUE)
+  make_proj_rast_visible(hide = FALSE)
+
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    test_data <- test_data(str_interp("input_${scale}.rds"))
+    
+    expect_no_error(rFunction(
+      data = test_data,
+      scale = scale,
+      raster_file = NULL,
+      raster_cat_file = NULL
+    ))
+  }
+  
+  withr::defer(make_proj_rast_visible(hide = TRUE))
 })
