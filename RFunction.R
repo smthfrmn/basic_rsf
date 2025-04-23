@@ -10,7 +10,6 @@ library(purrr)
 library(data.table)
 
 
-
 POPULATION <- "population"
 INDIVIDUAL <- "individual"
 

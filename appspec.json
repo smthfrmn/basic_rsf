@@ -34,13 +34,12 @@
       "from": "data/local_app_files/provided-app-files/raster_file/"
     }
     ],
-    
   "dependencies": {
     "R": [
       {
         "name": "ggplot2"
       },
-	  {
+      {
         "name": "sf"
       },
       {
@@ -59,16 +58,19 @@
         "name": "tidyterra"
       },
       {
-        "name": "progress"
-      },
-      {
         "name": "cowplot"
       },
       {
-        "name": "purr"
+        "name": "purrr"
+      },
+      {
+        "name": "data.table"
+      },
+      {
+        "name": "broom"
       }
     ]
-  },
+  }
   "createsArtifacts": true,
   "license": {
     "key": "MIT"
