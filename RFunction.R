@@ -138,7 +138,6 @@ get_projection_methods <- function(rast_obj,
       next
     }
 
-    is_categorical <- function(layer_values) {
       # Count unique values
     unique_vals <- unique(layer_values)
     n_unique <- length(unique_vals)
@@ -175,9 +174,6 @@ get_projection_methods <- function(rast_obj,
       }
     }
 
-      
-    }
-    
     # Set the layer type and method based on determination
     if (is_categorical) {
       layer_types[i] <- "categorical"
@@ -227,6 +223,7 @@ get_projected_rasters <- function(extent, raster_list, move_data) {
 
       methods_info <- get_projection_methods(cropped_rast)
 
+      layers <- list()
       for (i in 1:nlyr(cropped_rast)) {
         layer <- cropped_rast[[i]]
         method <- methods_info$method_vector[i]
@@ -343,14 +340,15 @@ plot_rasters <- function(rast_list, move_data, scale, track_id_var) {
       geom_spatvector(data = move_vector) +
       scale_fill_hypso_c() +
       theme_bw() +
-      theme(
-        legend.position = "right",
-        axis.text = element_text(size = 6)
-      )
+      theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+      coord_sf(expand = TRUE, datum = sf::st_crs(raster))
     
     if (scale == INDIVIDUAL) {
       plot <- plot +
-        facet_grid(get(track_id_var) ~ lyr)
+        theme(
+          strip.text.x = element_text(angle = 90, hjust = 1, size = 4)
+        ) +
+        facet_grid(lyr ~ get(track_id_var))
     } else {
       plot <- plot +
         facet_wrap(~lyr)
@@ -588,7 +586,6 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
           model_df = ind_data_df, model_variables = model_data$model_variables,
           user_provided_rasters = user_provided_rasters
         )
-
         coefs <- broom::tidy(model, conf.int = TRUE)
         return(coefs)
       })) |>

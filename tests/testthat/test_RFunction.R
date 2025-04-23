@@ -40,30 +40,8 @@ test_that("function runs without error without user-provided rasters", {
     ))
   }
 
-  withr::defer(toggle_raster_dirs(hide = TRUE))
-  
 })
 
-
-test_that("function runs without error without user-provided rasters", {
-  toggle_raster_dirs(hide = TRUE)
-  
-
-  for (i in 1:length(SCALES)) {
-    scale <- SCALES[i]
-    sample_data <- test_data(str_interp("input_${scale}.rds"))
-    
-    expect_no_error(rFunction(
-      data = sample_data,
-      scale = scale,
-      raster_file = NULL,
-      raster_cat_file = NULL
-    ))
-  }
-  
-  withr::defer(toggle_raster_dirs(hide = FALSE))
-  
-})
 
 
 
@@ -73,7 +51,7 @@ test_that("function gives same output as old version without error without user-
 
   for (i in 1:length(SCALES)) {
     scale <- SCALES[i]
-    sample_data <- test_data(str_interp("input_${scale}.rds"))
+    sample_data <- test_data(str_interp("input_${scale}.rds"), thin = FALSE)
     
     result <- rFunction(
       data = sample_data,
@@ -88,9 +66,10 @@ test_that("function gives same output as old version without error without user-
       )
     
     old_output <- readRDS(file = here(
-      str_interp("tests/testthat/data/output/old_model_${scale}_df.rds"))) |>
+      str_interp("tests/testthat/data/old_model_${scale}_df.rds"))) |>
       mutate(
-        term = gsub("lulc\\$|ghm\\$", "", term),
+        term = gsub("lulc", "LC", term),
+        term = gsub("ghm", "gHM", term),
         term = gsub("forest_cover", "tree_canopy_cover", term)
       ) |>
       arrange(
@@ -108,56 +87,17 @@ test_that("function gives same output as old version without error without user-
 })
 
 
-toggle_proj_raster <- function(hide) {
-  
-  if (!hide) {
-    # make the projected raster visible
-    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"),
-                here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat_hide.tif"))
-    file.rename(here("tests/testthat/data/raster_cat_proj.tif"),
-                here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"))
-  } else {
-    # hide the projected
-    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"),
-                here("tests/testthat/data/raster_cat_proj.tif"))
-    file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat_hide.tif"),
-                here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"))
 
-  }
-}
-
-
-
-sample_data <- test_data(str_interp("input_population.rds"))
-scale <- "population"
-rFunction(
-  data = test_data,
-  scale = scale,
-  raster_file = NULL,
-  raster_cat_file = NULL
-)
-
-
-methods_info <- get_projection_methods(test_rast)
-
-layers <- list()
-for (i in 1:nlyr(test_rast)) {
-  browser()
-  layer <- test_rast[[i]]
-  method <- methods_info$method_vector[i]
-  layers[[i]] <- terra::project(layer, "EPSG:3857", method = method)
-}
-
-test_that("function projects crs for unmatching move data and raster", {
+test_that("function projects crs for default move data crs and different crs raster", {
   toggle_raster_dirs(hide = TRUE)
   make_proj_rast_visible(hide = FALSE)
 
   for (i in 1:length(SCALES)) {
     scale <- SCALES[i]
-    test_data <- test_data(str_interp("input_${scale}.rds"))
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
     
     expect_no_error(rFunction(
-      data = test_data,
+      data = sample_data,
       scale = scale,
       raster_file = NULL,
       raster_cat_file = NULL
@@ -165,4 +105,24 @@ test_that("function projects crs for unmatching move data and raster", {
   }
   
   withr::defer(make_proj_rast_visible(hide = TRUE))
+})
+
+
+test_that("function projects crs for different move data crs and default crs raster", {
+  toggle_raster_dirs(hide = TRUE)
+
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
+    sample_data_proj <- sf::st_transform(sample_data, "+init=epsg:3857")
+    
+    expect_no_error(rFunction(
+      data = sample_data,
+      scale = scale,
+      raster_file = NULL,
+      raster_cat_file = NULL
+    ))
+  }
+  
+  withr::defer(make_proj_rast_visible(hide = FALSE))
 })

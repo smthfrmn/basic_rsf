@@ -1,6 +1,16 @@
-test_data <- function(test_file) {
+test_data <- function(test_file, thin = TRUE) {
     test_data_root_dir <- test_path("data")
-    readRDS(file = file.path(test_data_root_dir, test_file))
+    sample_data <- readRDS(file = file.path(test_data_root_dir, test_file)) 
+    
+    if (thin) {
+      sample_data <- sample_data |>
+        filter_track_data(.track_id = c("Prinzesschen..deploy_id.1930120.",
+                                      "Prinzesschen..deploy_id.1930121.",
+                                      "Prinzesschen..deploy_id.1930122.",
+                                      "Prinzesschen..deploy_id.1930123."))
+    }
+    
+    return(sample_data) 
 }
 
 
@@ -157,7 +167,6 @@ project_raster <- function(crs){
 
 make_proj_rast_visible <- function(hide = FALSE){
   
-  browser()
   real_path <- here("data/local_app_files/uploaded-app-files/raster_file/raster.tif")
   if (!hide) {
     test_path <- here("tests/testthat/data/raster_proj.tif")
@@ -172,3 +181,22 @@ make_proj_rast_visible <- function(hide = FALSE){
   }
   
 }
+
+
+# toggle_proj_raster <- function(hide) {
+#   
+#   if (!hide) {
+#     # make the projected raster visible
+#     file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"),
+#                 here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat_hide.tif"))
+#     file.rename(here("tests/testthat/data/raster_cat_proj.tif"),
+#                 here("data/local_app_files/uploaded-app-files/raster_cat_file/raster_cat.tif"))
+#   } else {
+#     # hide the projected
+#     file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"),
+#                 here("tests/testthat/data/raster_cat_proj.tif"))
+#     file.rename(here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat_hide.tif"),
+#                 here("data/local_app_files/uploaded-app-files/raster_cat_file_hide/raster_cat.tif"))
+#     
+#   }
+# }
