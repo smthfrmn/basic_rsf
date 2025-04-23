@@ -17,20 +17,20 @@ INDIVIDUAL <- "individual"
 
 get_raster_data <- function(locations, move_data, rasters, user_provided_rasters) {
   col_names <- unlist(lapply(rasters, names))
-  
-  
+
+
   # Create empty data.table
   dt <- data.table(matrix(NA, nrow = nrow(locations), ncol = length(col_names)))
   setnames(dt, col_names)
- 
+
   for (i in 1:length(rasters)) {
     current_raster <- rasters[[i]]
-    
+
     # Extract values for all layers at once if possible
     # First check if we need special handling for any layer
     layer_names <- names(current_raster)
     special_layers <- layer_names %in% c("tree_canopy_cover", "LC")
-    
+
     if (!any(special_layers) | user_provided_rasters) {
       # Standard extraction for all layers at once
       extracted_values <- terra::extract(current_raster, locations)
@@ -38,7 +38,6 @@ get_raster_data <- function(locations, move_data, rasters, user_provided_rasters
       # Add each column to the result
       extracted_col_names <- colnames(extracted_values)
       for (j in 1:length(extracted_col_names)) {
-        
         lyr_name <- extracted_col_names[j]
         dt[[lyr_name]] <- extracted_values[[lyr_name]]
       }
@@ -46,24 +45,24 @@ get_raster_data <- function(locations, move_data, rasters, user_provided_rasters
       # Handle special layers individually
       for (j in 1:nlyr(current_raster)) {
         lyr_name <- names(current_raster)[j]
-        
+
         if (lyr_name == "tree_canopy_cover") {
           # Extract with bilinear method for continuous data
           values <- terra::extract(current_raster[[j]], locations, method = "bilinear")
-          dt[[lyr_name]] <- as.numeric(base::scale(values[,1]))
+          dt[[lyr_name]] <- as.numeric(base::scale(values[, 1]))
         } else if (lyr_name == "LC") {
           # Handle categorical data
           values <- terra::extract(current_raster[[j]], locations)
-          dt[[lyr_name]] <- as.factor(values[,1])
+          dt[[lyr_name]] <- as.factor(values[, 1])
         } else {
           # Standard extraction
           values <- terra::extract(current_raster[[j]], locations)
-          dt[[lyr_name]] <- values[,1]
+          dt[[lyr_name]] <- values[, 1]
         }
       }
     }
   }
-  
+
   return(list(
     raster_data = dt,
     columns = col_names
@@ -138,7 +137,7 @@ get_projection_methods <- function(rast_obj,
       next
     }
 
-      # Count unique values
+    # Count unique values
     unique_vals <- unique(layer_values)
     n_unique <- length(unique_vals)
 
@@ -299,9 +298,11 @@ get_rasters <- function(extent, raster_file, raster_cat_file, move_data) {
 
 
 
-  rast_list_proj <- get_projected_rasters(extent = extent,
-                                          raster_list = rast_list,
-                                          move_data = move_data)
+  rast_list_proj <- get_projected_rasters(
+    extent = extent,
+    raster_list = rast_list,
+    move_data = move_data
+  )
 
   return(list(
     user_provided_rasters = user_provided_rasters,
@@ -340,9 +341,9 @@ plot_rasters <- function(rast_list, move_data, scale, track_id_var) {
       geom_spatvector(data = move_vector) +
       scale_fill_hypso_c() +
       theme_bw() +
-      theme(axis.text.x = element_text(angle = 60, hjust=1)) +
+      theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       coord_sf(expand = TRUE, datum = sf::st_crs(raster))
-    
+
     if (scale == INDIVIDUAL) {
       plot <- plot +
         theme(
@@ -391,117 +392,117 @@ get_elevation_data <- function(locations, move_data) {
       x = X,
       y = Y
     )
-  
+
   logger.info("Getting elevation data...")
-  
+
   # Create batches to avoid overwhelming the API
   batch_size <- 10000
   n_locations <- nrow(mut_locations)
   n_batches <- ceiling(n_locations / batch_size)
-  
+
   # Pre-allocate the result vector - much faster than building a list
   all_elevations <- numeric(n_locations)
-  
+
   for (i in 1:n_batches) {
-    start_idx <- (i-1) * batch_size + 1
+    start_idx <- (i - 1) * batch_size + 1
     end_idx <- min(i * batch_size, n_locations)
-    
+
     logger.info(
-      stringr::str_interp("Getting elevation batch ${i}/${n_batches} (rows ${start_idx}-${end_idx})"))
-    
+      stringr::str_interp("Getting elevation batch ${i}/${n_batches} (rows ${start_idx}-${end_idx})")
+    )
+
     # Extract the batch using data.table syntax for speed
-    batch_locations <- mut_locations[start_idx:end_idx,]
-    
+    batch_locations <- mut_locations[start_idx:end_idx, ]
+
     # Get elevation for this batch
     batch_elev <- get_elev_point(
       batch_locations,
-      prj = sf::st_crs(move_data), 
-      units = "meters", 
+      prj = sf::st_crs(move_data),
+      units = "meters",
       src = "aws"
     )$elevation
-    
+
     # Directly assign to the pre-allocated vector instead of building a list
     all_elevations[start_idx:end_idx] <- batch_elev
   }
-  
+
   # Scale once at the end
   elev_dat <- base::scale(all_elevations)[, 1]
-  
+
   return(elev_dat)
 }
 
 
-convert_categorical_cols <- function(df, 
-                                     max_unique_values = 20, 
+convert_categorical_cols <- function(df,
+                                     max_unique_values = 20,
                                      integer_threshold = 0.99,
                                      include_character = TRUE) {
-  
   # Input validation
   if (!is.data.frame(df)) {
     stop("Input must be a data frame")
   }
-  
+
   # Create a copy of the data frame to avoid modifying the original
   result_df <- df
-  
+
   # Process each column
   for (col_name in names(df)) {
     col_data <- df[[col_name]]
-    
+
     # Skip columns that are already factors
     if (is.factor(col_data)) {
       next
     }
-    
+
     # Skip columns that are not numeric or character
     if (!is.numeric(col_data) && !is.character(col_data)) {
       next
     }
-    
+
     # For character columns, convert to factor if requested
     if (is.character(col_data)) {
       if (include_character) {
         # Check if the number of unique values is reasonable
         unique_vals <- unique(col_data)
         n_unique <- length(unique_vals)
-        
+
         if (n_unique <= max_unique_values && n_unique > 1) {
           result_df[[col_name]] <- as.factor(col_data)
         }
       }
       next
     }
-    
+
     # For numeric columns, apply more checks
-    
+
     # Remove NA values for analysis
     non_na_data <- col_data[!is.na(col_data)]
-    
+
     # If we have too few values after NA removal, skip
     if (length(non_na_data) < 10) {
       next
     }
-    
+
     # Count unique values
     unique_vals <- unique(non_na_data)
     n_unique <- length(unique_vals)
-    
+
     # Skip binary (0/1) columns
     is_binary <- n_unique <= 2 && all(unique_vals %in% c(0, 1))
     if (is_binary) {
       next
     }
-    
+
     # Check if values are integers
     integers_proportion <- sum(non_na_data == floor(non_na_data)) / length(non_na_data)
     all_integers <- integers_proportion >= integer_threshold
-    
+
     # Convert to factor if the column appears categorical
     if (n_unique <= max_unique_values && n_unique > 1 && all_integers) {
       result_df[[col_name]] <- as.factor(col_data)
     }
   }
-  
+
   return(result_df)
 }
 
@@ -535,15 +536,16 @@ get_model_data <- function(locations, move_data, rasters,
   }
 
   model_df <- convert_categorical_cols(model_data)
-  
-  return(list(model_df = model_df,
-              model_variables = model_variables))
+
+  return(list(
+    model_df = model_df,
+    model_variables = model_variables
+  ))
 }
 
 
 rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
                       scale) {
-
   track_id_var <- mt_track_id_column(data)
   rast_ext <- ext(as.vector(ext(data)) + c(-0.5, 0.5, -0.5, 0.5))
 
@@ -611,10 +613,12 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
     track_id_var = track_id_var
   )
 
-  raster_plots <- plot_rasters(rast_list = rasters,
-                               move_data = data,
-                               scale = scale,
-                               track_id_var = track_id_var)
+  raster_plots <- plot_rasters(
+    rast_list = rasters,
+    move_data = data,
+    scale = scale,
+    track_id_var = track_id_var
+  )
 
   ggsave(model_plot,
     file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "model_coeffcient_plot.jpeg"),
