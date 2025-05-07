@@ -5,9 +5,11 @@ library(sf)
 library(ggplot2)
 library(elevatr)
 library(tidyverse)
-library(cowplot)
 library(purrr)
 library(data.table)
+library(broom)
+library(tools)
+library(ggpubr)
 
 
 POPULATION <- "population"
@@ -243,8 +245,8 @@ get_projected_rasters <- function(extent, raster_list, move_data) {
 
 
 get_rasters <- function(extent, raster_file, raster_cat_file, move_data) {
-  rast1_path <- getAppFilePath("raster_file", fallbackToProvidedFiles = FALSE)
-  rast2_path <- getAppFilePath("raster_cat_file", fallbackToProvidedFiles = FALSE)
+  rast1_path <- getAuxiliaryFilePath("raster_file", fallbackToProvidedFiles = FALSE)
+  rast2_path <- getAuxiliaryFilePath("raster_cat_file", fallbackToProvidedFiles = FALSE)
 
 
   if (!is.null(rast1_path) | !is.null(rast2_path)) {
@@ -253,43 +255,25 @@ get_rasters <- function(extent, raster_file, raster_cat_file, move_data) {
 
     rast_list <- list()
     if (!is.null(rast1_path)) {
-      rast_path <- list.files(
-        path = rast1_path, pattern = "\\.tif$",
-        all.files = FALSE,
-        full.names = TRUE,
-        recursive = FALSE,
-        ignore.case = FALSE,
-        include.dirs = FALSE
-      )[1]
-
-      if (is.null(rast_path)) {
+      if (file_ext(rast1_path) != "tif") {
         stop("Raster with extension .tif not found, please make sure you uploaded a tif file.")
       }
 
-      rast1 <- terra::rast(rast_path)
+      rast1 <- terra::rast(rast1_path)
       rast_list[[length(rast_list) + 1]] <- rast1
     }
 
     if (!is.null(rast2_path)) {
-      rast_path <- list.files(
-        path = rast2_path, pattern = "\\.tif$",
-        all.files = FALSE,
-        full.names = TRUE,
-        recursive = FALSE,
-        ignore.case = FALSE,
-        include.dirs = FALSE
-      )[1]
-
-      if (is.null(rast_path)) {
+      if (file_ext(rast2_path) != "tif") {
         stop("Raster with extension .tif not found, please make sure you uploaded a tif file.")
       }
 
-      rast2 <- terra::rast(rast_path)
+      rast2 <- terra::rast(rast2_path)
       rast_list[[length(rast_list) + 1]] <- rast2
     }
   } else {
-    rast_lc_tree_canopy <- terra::rast(paste0(getAppFilePath("raster_file"), "raster.tif"))
-    rast_ghm <- terra::rast(paste0(getAppFilePath("raster_file"), "raster_hm.tif"))
+    rast_lc_tree_canopy <- terra::rast(paste0(getAuxiliaryFilePath("raster_file"), "raster.tif"))
+    rast_ghm <- terra::rast(paste0(getAuxiliaryFilePath("raster_file"), "raster_hm.tif"))
 
     rast_list <- list(rast_lc_tree_canopy, rast_ghm)
     user_provided_rasters <- FALSE
@@ -331,34 +315,69 @@ fit_model <- function(model_df, model_variables, user_provided_rasters = FALSE) 
 
 plot_rasters <- function(rast_list, move_data, scale, track_id_var) {
   plot_list <- list()
-  move_vector <- as_spatvector(move_data)
-
+  move_vector <- as_spatvector(move_data) |>
+    filter(
+      case == 1
+    )
+  
+  
+  # Create plots without individual legends for track_id
   for (i in 1:length(rast_list)) {
     raster <- rast_list[[i]]
-    plot <- ggplot() +
-      geom_spatraster(data = raster) +
-      geom_spatvector(data = move_vector) +
-      scale_fill_hypso_c() +
-      theme_bw() +
-      theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-      coord_sf(expand = TRUE, datum = sf::st_crs(raster))
-
-    if (scale == INDIVIDUAL) {
-      plot <- plot +
-        theme(
-          strip.text.x = element_text(angle = 90, hjust = 1, size = 4)
-        ) +
-        facet_grid(lyr ~ get(track_id_var))
-    } else {
-      plot <- plot +
-        facet_wrap(~lyr)
+    for (j in 1:nlyr(raster)) {
+      layer <- raster[[j]]
+      plot <- ggplot() +
+        geom_spatraster(data = terra::crop(layer, move_vector)) +
+        theme_bw() +
+        scale_fill_hypso_c() +
+        theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+        coord_sf(expand = TRUE, datum = sf::st_crs(raster)) +
+        ggtitle(names(layer)[1])
+      
+      if (scale == INDIVIDUAL) {
+        # Add vectors but hide their legend
+        plot <- plot +
+          geom_spatvector(data = move_vector,
+                          aes(color = get(track_id_var)),
+                          show.legend = FALSE)
+      } else {
+        plot <- plot +
+          geom_spatvector(data = move_vector,
+                          show.legend = FALSE)
+      }
+      plot_list[[length(plot_list) + 1]] <- plot
     }
-
-    plot_list[[i]] <- plot
   }
+  
+  plots_arranged <- ggpubr::ggarrange(
+    plotlist = plot_list,
+    ncol = 3,
+    nrow = ceiling(length(plot_list)/3)
+  )
 
-  plots <- cowplot::plot_grid(plotlist = plot_list)
-  return(plots)
+  if(scale == INDIVIDUAL) {
+    # Create legend with better formatting
+    legend_only <- ggplot() +
+      geom_spatvector(data = move_vector, aes(color = get(track_id_var))) +
+      labs(color = track_id_var) +
+      theme_minimal()
+    
+    # Get the legend
+    common_legend <- ggpubr::get_legend(legend_only)
+    
+    # Arrange plots with the legend at the bottom
+    final_arrangement <- ggpubr::ggarrange(
+      plots_arranged,
+      common_legend,
+      ncol = 1,
+      nrow = 2,
+      heights = c(0.9, 0.1) # 90% for plots, 10% for legend
+    )
+  } else {
+    final_arrangement <- plots_arranged
+  }
+  
+  return(final_arrangement)
 }
 
 
@@ -595,15 +614,16 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
   }
 
 
-  # if (!user_provided_rasters) {
-  #   rasters$elevation <- terra::rast(
-  #     get_elev_raster(rasters[[1]],
-  #       src = "aws",
-  #       prj = st_crs(move_data),
-  #       z = 3
-  #     )
-  #   )
-  # }
+  if (!user_provided_rasters) {
+    rasters$elevation <- terra::rast(
+      get_elev_raster(rasters[[1]],
+        src = "aws",
+        prj = st_crs(move_data),
+        z = 3,
+        clip = "bbox"
+      )
+    )
+  }
 
 
   model_plot <- plot_model(
@@ -626,7 +646,7 @@ rFunction <- function(data, raster_file = NULL, raster_cat_file = NULL,
 
   ggsave(raster_plots,
     file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "raster_plot.jpeg"),
-    width = 9, height = 6, units = "in", dpi = 300, bg = "white"
+    width = 12, height = 14
   )
 
   write.csv(model_plot_df,

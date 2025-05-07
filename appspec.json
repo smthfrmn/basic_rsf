@@ -60,7 +60,7 @@
         "name": "tidyterra"
       },
       {
-        "name": "cowplot"
+        "name": "ggpubr"
       },
       {
         "name": "purrr"
@@ -70,6 +70,9 @@
       },
       {
         "name": "broom"
+      },
+      {
+        "name": "tools"
       }
     ]
   },
