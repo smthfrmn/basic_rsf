@@ -1,55 +1,47 @@
 {
   "settings": [
-  {
-    "id": "raster_file",
-      "name": "Continuous raster file",
-      "description": "Optionally, upload a local raster file with continuous data to include in the resource selection function analysis. Make sure that the raster data overlap with the tracking data set and are in WGS84 projection! The file must be named `raster.tif`. Note that fallback raster files of elevation, forest cover, land cover and human modification are provided. See App documentation for details.",
-      "type": "LOCAL_FILE"
-  },
-   {
-      "id": "raster_cat_file",
-      "name": "Categorical raster file",
-      "description": "Optionally, upload a local raster file with categorical data to include in the resource selection function analysis. Make sure that the raster data overlap with the tracking data set and are in WGS84 projection! The file must be named `raster_cat.tif`.",
+    {
+      "id": "raster_file",
+      "name": "Raster File One [Optional]",
+      "description": "Upload your local raster file here. All layers in the raster will be included as a variable in the Resource Selection Function (RSF). If you do not provide any rasters, the app will automatically fit and RSF using fallback variables elevation, forest cover, land cover, and human modification. See App documentation for details.Note: if the raster is a different projection (i.e., different CRS) then the input move data, the raster will be projected to the CRS of the move data. The projecting process will make the app run for longer. You can view the logs to see if this occured. Consider projecting your raster locally to match (most likely to WGS 84 or EPSG:4326) to improve the performance time.",
       "type": "LOCAL_FILE"
     },
     {
-      "id": "type_ind",
-      "name": "Analysis level",
-      "description": "Specify whether to perform the resource selection analysis for the population or per individual.",
-      "defaultValue": false,
+      "id": "raster_cat_file",
+      "name": "Raster File Two [Optional]",
+      "description": "Upload a second local raster file here, if you have it. Refer to the 'Note' in the 'Raster File One' description.",
+      "type": "LOCAL_FILE"
+    },
+    {
+      "id": "scale",
+      "name": "Scale",
+      "description": "Specify how you want to perform the resource selection function. Your scale here should match the one you used in the Background Points Generator app.",
+      "defaultValue": "population",
       "type": "RADIOBUTTONS",
       "options": [
         {
-          "value": false,
+          "value": "population",
           "displayText": "Population"
         },
         {
-          "value": true,
+          "value": "individual",
           "displayText": "Individual"
         }
       ]
-    },
-    {
-      "id": "num_layers",
-      "name": "Number of layers in the uploaded raster",
-      "description": "If a local raster file is provided, specify the number of layers contained in the file.",
-      "defaultValue": 1,
-      "type": "INTEGER"
     }
-],
-     "providedAppFiles": [
+  ],
+  "providedAppFiles": [
     {
       "settingId": "raster_file",
       "from": "data/local_app_files/provided-app-files/raster_file/"
     }
-    ],
-    
+  ],
   "dependencies": {
     "R": [
       {
         "name": "ggplot2"
       },
-	  {
+      {
         "name": "sf"
       },
       {
@@ -68,10 +60,19 @@
         "name": "tidyterra"
       },
       {
-        "name": "progress"
+        "name": "ggpubr"
       },
       {
-        "name": "cowplot"
+        "name": "purrr"
+      },
+      {
+        "name": "data.table"
+      },
+      {
+        "name": "broom"
+      },
+      {
+        "name": "tools"
       }
     ]
   },
@@ -85,11 +86,11 @@
     "habitat-use",
     "movement modelling",
     "spatio-temporal",
-	  "animal movement"
+    "animal movement"
   ],
   "people": [
     {
-       "firstName": "Nilanjan",
+      "firstName": "Nilanjan",
       "middleInitials": null,
       "lastName": "Chatterjee",
       "email": "nchatter@umn.edu",
@@ -97,14 +98,27 @@
       "orcid": "0000-0002-7932-0191",
       "affiliation": "University of Minnesota",
       "affiliationRor": ""
+    },
+      {
+      "firstName": "Smith",
+      "middleInitials": null,
+      "lastName": "Freeman",
+      "email": "smithifreeman@gmail.com",
+      "roles": [
+        "author",
+        "creator"
+      ],
+      "orcid": "0009-0008-0430-653X",
+      "affiliation": "University of Minnesota",
+      "affiliationRor": "https://ror.org/03grvy078"
     }
   ],
-	"funding": [
+  "funding": [
     {
-	"name": "NASA MoveApps Project"
-	}
+      "name": "NASA MoveApps Project"
+    }
   ],
-  "documentation" : {
+  "documentation": {
     "url": "https://github.com/nilanjanchatterjee/basic_rsf/blob/master/README.md"
   }
 }
