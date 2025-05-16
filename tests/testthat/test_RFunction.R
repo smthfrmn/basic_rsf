@@ -122,3 +122,37 @@ test_that("function projects crs for different move data crs and default crs ras
 
   withr::defer(make_proj_rast_visible(hide = FALSE))
 })
+
+
+test_that("function runs without error without user-provided rasters and default variables", {
+  toggle_raster_dirs(hide = TRUE)
+  
+  
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
+    
+    expect_no_error(rFunction(
+      data = sample_data,
+      scale = scale,
+      raster_file = NULL,
+      raster_cat_file = NULL,
+      include_percent_tree_cover = TRUE,
+      include_land_cover_type = TRUE,
+      include_global_human_modification = TRUE,
+      include_elevation = TRUE
+    ))
+  }
+})
+
+# sample_data <- test_data(str_interp("input_population.rds"))
+# rFunction(
+#   data = sample_data,
+#   scale = "individual",
+#   raster_file = NULL,
+#   raster_cat_file = NULL,
+#   include_percent_tree_cover = TRUE,
+#   include_land_cover_type = TRUE,
+#   include_global_human_modification = TRUE,
+#   include_elevation = FALSE
+# )
