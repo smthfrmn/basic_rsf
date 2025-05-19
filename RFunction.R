@@ -12,44 +12,49 @@ library(tools)
 library(ggpubr)
 
 
-# TODO:
-# - update custom rasters to be functional/actually different from default (download from somewhere?)
-# - hide custom rasters using environmental variables versus changing name of folder, it's finicky
-
-
 POPULATION <- "population"
 INDIVIDUAL <- "individual"
 
 
 get_raster_data <- function(locations, move_data, rasters, include_percent_tree_cover) {
   logger.info("Getting raster data...")
-  col_names <- unlist(lapply(rasters, names))
   
-  # Create empty data.table
-  dt <- data.table(matrix(NA, nrow = nrow(locations), ncol = length(col_names)))
+  if (is_empty(rasters)) {
+    logger.info("No rasters were provided by the user nor did the user select any default environmental variables")
 
-  for (i in 1:length(rasters)) {
-    current_raster <- rasters[[i]]
+    # Create placeholder data.table
+    dt <- data.table(case = move_data$case)
+    col_names <- c()
+  } else {
+    col_names <- unlist(lapply(rasters, names))
     
-    if (names(current_raster) == "percent_tree_cover" && include_percent_tree_cover) {
-      # Extract with bilinear method for continuous data
-      values <- terra::extract(current_raster, locations, method = "bilinear")
-      dt[["percent_tree_cover_scaled"]] <- as.numeric(base::scale(values[, 1]))
+    # Create empty data.table
+    dt <- data.table(matrix(NA, nrow = nrow(locations), ncol = length(col_names)))
+    
+    for (i in 1:length(rasters)) {
+      current_raster <- rasters[[i]]
       
-      col_names <- gsub("percent_tree_cover", "percent_tree_cover_scaled", col_names)
-    } else {
-      
-      # if not special case, then just extract same as all others
-      extracted_values <- terra::extract(current_raster, locations)
-      
-      # Add each column to the result
-      extracted_col_names <- colnames(extracted_values)
-      for (j in 1:length(extracted_col_names)) {
-        lyr_name <- extracted_col_names[j]
-        dt[[lyr_name]] <- extracted_values[[lyr_name]]
+      if (("percent_tree_cover" %in% names(current_raster)) & include_percent_tree_cover) {
+        # Extract with bilinear method for continuous data
+        values <- terra::extract(current_raster, locations, method = "bilinear")
+        dt[["percent_tree_cover_scaled"]] <- as.numeric(base::scale(values[, 1]))
+        
+        col_names <- gsub("percent_tree_cover", "percent_tree_cover_scaled", col_names)
+      } else {
+        
+        # if not special case, then just extract same as all others
+        extracted_values <- terra::extract(current_raster, locations)
+        
+        # Add each column to the result
+        extracted_col_names <- colnames(extracted_values)
+        for (j in 1:length(extracted_col_names)) {
+          lyr_name <- extracted_col_names[j]
+          dt[[lyr_name]] <- extracted_values[[lyr_name]]
+        }
       }
     }
   }
+  
 
   return(list(
     raster_data = dt,
@@ -229,11 +234,13 @@ get_projected_rasters <- function(extent, raster_list, move_data) {
       for (i in 1:nlyr(cropped_rast)) {
         layer <- cropped_rast[[i]]
         method <- methods_info$method_vector[i]
-        layer_type <- methods_info$type[i]
+        layer_type <- methods_info$results_table$type[i]
         current_layer <- terra::project(layer, crs(move_data), method = method)
         
         if (layer_type == "categorical") {
           layers[[i]] <- as.factor(current_layer)
+        } else {
+          layers[[i]] <- current_layer
         }
       }
 
@@ -262,12 +269,13 @@ get_projected_rasters <- function(extent, raster_list, move_data) {
 }
 
 
-get_rasters <- function(extent, raster_file, raster_cat_file, move_data,
-                        include_percent_tree_cover, include_land_cover_type, include_global_human_modification, include_elevation) {
+get_rasters <- function(extent, move_data, include_percent_tree_cover,
+                        include_land_cover_type, include_global_human_modification,
+                        include_elevation) {
   logger.info("Getting rasters...")
 
-  rast1_path <- getAuxiliaryFilePath("raster_file", fallbackToProvidedFiles = FALSE)
-  rast2_path <- getAuxiliaryFilePath("raster_cat_file", fallbackToProvidedFiles = FALSE)
+  rast1_path <- getAuxiliaryFilePath("user_raster_file_1", fallbackToProvidedFiles = FALSE)
+  rast2_path <- getAuxiliaryFilePath("user_raster_file_2", fallbackToProvidedFiles = FALSE)
 
   rast_list <- list()
 
@@ -323,9 +331,15 @@ get_rasters <- function(extent, raster_file, raster_cat_file, move_data,
 fit_model <- function(model_df, model_variables) {
   logger.info("Fitting model...")
   custom_vars <- paste0(model_variables, collapse = " + ")
+  
+  custom_vars_str <- ifelse(custom_vars == "", 
+                            "", 
+                            stringr::str_interp(" + ${custom_vars}"))
+  
   formula_str <- stringr::str_interp(
-    "case ~ delx + dely + distxy + ${custom_vars}"
+    "case ~ delx + dely + distxy${custom_vars_str}"
   )
+  
 
   model_args <- list(
     formula = as.formula(formula_str),
@@ -341,12 +355,17 @@ fit_model <- function(model_df, model_variables) {
 
 plot_rasters <- function(rast_list, move_data, scale, track_id_var) {
   logger.info("Plotting rasters...")
+  
+  if (is_empty(rast_list)) {
+    logger.info("No rasters to plot")
+    return(NULL)
+  }
+  
   plot_list <- list()
   move_vector <- as_spatvector(move_data) |>
     filter(
       case == 1
     )
-
 
   # Create plots without individual legends for track_id
   for (i in 1:length(rast_list)) {
@@ -422,12 +441,12 @@ plot_rasters <- function(rast_list, move_data, scale, track_id_var) {
 
 plot_model <- function(model_plot_df, scale, track_id_var) {
   model_plot <- ggplot(model_plot_df) +
-    geom_point(aes(y = term, x = estimate), col = "blue") +
     geom_linerange(aes(
       y = term,
       xmin = conf.low,
       xmax = conf.high
     )) +
+    geom_point(aes(y = term, x = estimate), col = "blue") +
     labs(y = "Variable", x = "Coefficient Estimate") +
     theme_bw()
 
@@ -568,6 +587,7 @@ convert_categorical_cols <- function(df,
 get_model_data <- function(locations, move_data, rasters,
                            include_elevation, include_percent_tree_cover,
                            track_id_var) {
+  
   raster_data_result <- get_raster_data(
     locations = locations,
     move_data = move_data,
@@ -595,16 +615,16 @@ get_model_data <- function(locations, move_data, rasters,
   }
 
 
-  model_df <- convert_categorical_cols(model_data)
+  # model_df <- convert_categorical_cols(model_data)
 
   return(list(
-    model_df = model_df,
+    model_df = model_data,
     model_variables = model_variables
   ))
 }
 
 
-rFunction <- function(data, scale, raster_file = NULL, raster_cat_file = NULL,
+rFunction <- function(data, scale, user_raster_file_1 = NULL, user_raster_file_2 = NULL,
                       include_percent_tree_cover = FALSE,
                       include_land_cover_type = FALSE,
                       include_global_human_modification = FALSE,
@@ -616,8 +636,6 @@ rFunction <- function(data, scale, raster_file = NULL, raster_cat_file = NULL,
 
   raster_list_result <- get_rasters(
     extent = rast_ext,
-    raster_file = raster_file,
-    raster_cat_file = raster_cat_file,
     move_data = data,
     include_percent_tree_cover = include_percent_tree_cover,
     include_land_cover_type = include_land_cover_type,
@@ -661,12 +679,12 @@ rFunction <- function(data, scale, raster_file = NULL, raster_cat_file = NULL,
 
 
   if (include_elevation) {
-    logger.info("Getting elevation raster...")
+    logger.info("Getting elevation raster at very low resolution...")
     rasters$elevation <- terra::rast(
       get_elev_raster(rasters[[1]],
         src = "aws",
         prj = st_crs(data),
-        z = 4,
+        z = 0,
         clip = "bbox",
         override_size_check = TRUE
       )
@@ -693,10 +711,12 @@ rFunction <- function(data, scale, raster_file = NULL, raster_cat_file = NULL,
     width = 9, height = 6, units = "in", dpi = 300
   )
 
-  ggsave(raster_plots,
-    file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "raster_plot.jpeg"),
-    width = 12, height = 14
-  )
+  if (!is.null(raster_plots)) {
+    ggsave(raster_plots,
+           file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "raster_plot.jpeg"),
+           width = 12, height = 14
+    )
+  }
 
   write.csv(model_plot_df,
     file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "rsf_coefficient_output.csv"),
