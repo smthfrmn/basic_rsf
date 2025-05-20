@@ -18,9 +18,9 @@ activate_raster_files <- function(files_to_show) {
   if (files_to_show == "fallback") {
     Sys.setenv(USER_APP_FILE_UPLOAD_DIR = "I/AM/A/FAKE/PATH/") 
   } else if (files_to_show == "user_provided") {
-    Sys.setenv(USER_APP_FILE_UPLOAD_DIR = here("data/local_app_files/uploaded-app-files/"))
+    Sys.setenv(USER_APP_FILE_UPLOAD_DIR = here("tests/testthat/data/local_app_files/uploaded-app-files/"))
   } else if (files_to_show == "user_provided_projected") {
-    Sys.setenv(USER_APP_FILE_UPLOAD_DIR = here("data/local_app_files/uploaded-app-files-projected/"))
+    Sys.setenv(USER_APP_FILE_UPLOAD_DIR = here("tests/testthat/data/local_app_files/uploaded-app-files-projected/"))
   } else {
     stop(str_interp("Unknown files_to_show ${files_to_show}"))
   }
