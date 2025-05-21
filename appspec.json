@@ -60,8 +60,16 @@
   ],
   "providedAppFiles": [
     {
-      "settingId": "raster_files",
-      "from": "data/local_app_files/provided-app-files/"
+      "settingId": "percent_tree_cover",
+      "from": "data/local_app_files/provided-app-files/percent_tree_cover/"
+    },
+    {
+      "settingId": "land_cover_type",
+      "from": "data/local_app_files/provided-app-files/land_cover_type/"
+    },
+    {
+      "settingId": "global_human_modification",
+      "from": "data/local_app_files/provided-app-files/global_human_modification/"
     }
   ],
   "dependencies": {

@@ -2,7 +2,6 @@ source(here("tests/testthat/helper.R"))
 
 SCALES <- c("population", "individual")
 
-
 test_that("function runs without error with user-provided rasters", {
   activate_raster_files(files_to_show = "user_provided")
 
@@ -21,6 +20,26 @@ test_that("function runs without error with user-provided rasters", {
 })
 
 
+test_that("function runs only with elevation", {
+  activate_raster_files(files_to_show = "fallback")
+  
+  
+  for (i in 1:length(SCALES)) {
+    scale <- SCALES[i]
+    sample_data <- test_data(str_interp("input_${scale}.rds"))
+    
+    expect_no_error(rFunction(
+      data = sample_data,
+      scale = scale,
+      user_raster_file_1 = NULL,
+      user_raster_file_2 = NULL,
+      include_percent_tree_cover = FALSE,
+      include_land_cover_type = FALSE,
+      include_global_human_modification = FALSE,
+      include_elevation = TRUE
+    ))
+  }
+})
 
 
 
