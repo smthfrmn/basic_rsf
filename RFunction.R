@@ -145,6 +145,7 @@ is_categorical_layer <- function(layer,
   return(list(is_categorical = is_categorical, reasons = paste(reason_parts, collapse = "; ")))
 }
 
+
 get_projection_methods <- function(rast_obj,
                                    categorical_method = "near",
                                    continuous_methods = c("bilinear", "cubic"),
@@ -473,55 +474,6 @@ plot_model <- function(model_plot_df, scale, track_id_var) {
   return(model_plot)
 }
 
-# Optimized get_nonraster_data function with batching and progress bar
-# get_elevation_data <- function(locations, move_data) {
-#   logger.info("Getting elevation data...")
-#
-#   # Convert to data.table directly
-#   mut_locations <- locations |>
-#     as.data.frame() |>
-#     rename(
-#       x = X,
-#       y = Y
-#     )
-#
-#
-#   # Create batches to avoid overwhelming the API
-#   batch_size <- 20000
-#   n_locations <- nrow(mut_locations)
-#   n_batches <- ceiling(n_locations / batch_size)
-#
-#   # Pre-allocate the result vector - much faster than building a list
-#   all_elevations <- numeric(n_locations)
-#
-#   for (i in 1:n_batches) {
-#     start_idx <- (i - 1) * batch_size + 1
-#     end_idx <- min(i * batch_size, n_locations)
-#
-#     logger.info(
-#       stringr::str_interp("Getting elevation batch ${i}/${n_batches} (rows ${start_idx}-${end_idx})")
-#     )
-#
-#     # Extract the batch using data.table syntax for speed
-#     batch_locations <- mut_locations[start_idx:end_idx, ]
-#
-#     # Get elevation for this batch
-#     batch_elev <- get_elev_point(
-#       batch_locations,
-#       prj = sf::st_crs(move_data),
-#       units = "meters",
-#       src = "aws"
-#     )$elevation
-#
-#     # Directly assign to the pre-allocated vector instead of building a list
-#     all_elevations[start_idx:end_idx] <- batch_elev
-#   }
-#
-#   # Scale once at the end
-#   elev_dat <- base::scale(all_elevations)[, 1]
-#
-#   return(elev_dat)
-# }
 
 get_model_data <- function(locations, move_data, rasters,
                            include_elevation, include_percent_tree_cover,
@@ -546,15 +498,6 @@ get_model_data <- function(locations, move_data, rasters,
     )
 
   model_variables <- raster_data_result$columns
-
-  # if (include_elevation) {
-  #   model_data$elevation_scaled <- get_elevation_data(
-  #     locations = locations,
-  #     move_data = move_data
-  #   )
-  #   model_variables <- c(model_variables, "elevation_scaled")
-  # }
-
 
   return(list(
     model_df = model_data,
@@ -583,7 +526,6 @@ rFunction <- function(data, scale, user_raster_file_1 = NULL, user_raster_file_2
   )
 
   rasters <- raster_list_result$rasters
-
 
   model_data <- get_model_data(
     locations = locations,
@@ -617,21 +559,6 @@ rFunction <- function(data, scale, user_raster_file_1 = NULL, user_raster_file_2
       dplyr::select(-nested_data)
   }
 
-
-  # if (include_elevation) {
-  #   logger.info("Getting elevation raster at very low resolution...")
-  #   rasters$elevation <- terra::rast(
-  #     get_elev_raster(rasters[[1]],
-  #       src = "aws",
-  #       prj = st_crs(data),
-  #       z = 3,
-  #       clip = "bbox",
-  #       override_size_check = TRUE
-  #     )
-  #   )
-  #
-  #   names(rasters$elevation) <- c("elevation")
-  # }
 
   model_plot <- plot_model(
     model_plot_df = model_plot_df,

@@ -1,4 +1,7 @@
-# simple_rsf
+# Basic RSF
+
+MoveApps
+
 Repository for doing simple resource selection analysis in Moveapps 
 Github repository: https://github.com/nilanjanchatterjee/basic_rsf
 
@@ -22,12 +25,22 @@ If the user uploads their own rasters, environmental variables from all layers w
 
 The output file includes a coefficient plot of the variables used in the resource selection function and a data frame of regression coefficients. Coefficients overlapping zero shows non-significance whereas coefficients greater than 0 shows preference and less than 0 signifies avoidance of the environmental variable. 
 
-## Input data
 
+### Application scope
+#### Generality of App usability
+*State here if the App was developed for a specific species, taxon or taxonomic group, or to answer a specific question. How might it influence the scope and utility of the App. This information will help the user to understand why the App might be producing no or odd results.*
+
+*Examples:*
+
+This App was developed using data from birds and ungulates, but should function with any species. Default environmental variables are all terrestrial. If your species lives in the water, make sure you upload appropriate rasters containing variables that vary in water environments.
+
+#### Required data properties
+To use this App, you must first run the Background Points Generator App which will generate a bunch of background points that will, with the observed points, be used to model the resource selection function.
+
+### Input type
 `move2::move2_loc` and following use of the Background points generator App (set to the same scale -- "individual" or "population")
 
-## Output data
-
+### Output type
 `move2::move2_loc`
 
 ### Artefacts
@@ -56,3 +69,34 @@ The coefficient summary of the model(s) fit when the app was run. Note that if t
 *raster_plot.jpeg*
 
 A plot all the rasters from which environmental variables were extracted and used to fit the RSF. Movement trajectories are plotted on each. Note that if `scale` is "Individual", individuals are represented by different colors.
+
+### Settings 
+
+`Scale`: Specify how you want to perform the resource selection function (population or individual-level). Your scale here should match the one you used in the Background Points Generator App.
+
+`Raster File One [Optional]`: Upload your local raster file here. All layers in the raster will be included as a custom variable in the Resource Selection Function (RSF). If you do not upload any rasters, consider selecting at least one of the default environmental variables offered below. If the raster is a different projection (i.e., different CRS) than the input move data, the raster will be projected to the CRS of the move data. The projecting process will make the app run for longer. You can view the logs to see if this occurred. Consider projecting your raster locally to match (most likely to WGS 84 or EPSG:4326) to improve the performance time.
+
+`Raster File Two [Optional]`: Upload a second local raster file here, if you have it. Refer to the 'Note' in the 'Raster File One' description.
+
+`Percent tree cover`: For this setting and the following three checkboxes, select the checkbox if you want to include the default variables in your RSF. If you didn't upload any custom rasters, you should select at least one default variable; otherwise, your RSF will only include coefficients for selection for the centroid location. You can also include default variables in an RSF with custom variables. See data source: https://lpdaac.usgs.gov/products/gfcc30tcv003/. Values will be scaled and centered before the model is fit.
+
+`Land cover type`: Include this as default variable. See data source: https://modis.gsfc.nasa.gov/data/dataprod/mod12.php
+
+`Global human modification`: Include this as a default variable. See data source: https://data.nasa.gov/dataset/Global-Human-Modification-of-Terrestrial-Systems/4t8v-e7f3/about_data
+
+
+`Elevation (m)`: Include this default variable: Note: this data is sourced from a third party and can make the App run for a while, especially if your move data covers a large geographic area. See data source: https://cran.r-project.org/web/packages/elevatr/index.html. Values will be scaled and centered before the model is fit.
+
+### Changes in output data
+
+The input data remains unchanged.
+
+### Most common errors
+
+The *model_coefficient_plot.jpeg* may contain confidence intervals that do not overlap with the actual coefficient estimate. This is an indication that the model did not actually converge. Check the logs to see what messages were recorded during model fitting. 
+
+It is possible the App will incorrectly interpret an uploaded raster's data as categorical when it should be continuous. If this happens, either log an issue on github on the App or email Smith Freeman at freem850@umn.edu with the raster you tried to use.
+
+### Null or error handling
+
+**Settings `Raster File One [Optional]` and `Raster File Two [Optional]`:** If the user uploads a file but it does not end in ".tif", the App will log an error and return immediately.
